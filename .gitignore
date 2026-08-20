@@ -37,3 +37,6 @@ npm-debug.log*
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# .claude/skills is a junction mirror of .agents/skills (single source of truth)
+.claude/skills/
