@@ -1,0 +1,380 @@
+{
+  "pack": "royal-treasury-icons-pack",
+  "version": "1.0.0",
+  "createdFor": "Castle Fling Royal Treasury menu",
+  "installPath": "assets/castle-fling/royal-treasury/",
+  "sourceSheet": "source_sheets/royal_treasury_icon_sheet_original.png",
+  "cleanedSourceSheet": "source_sheets/royal_treasury_icon_sheet_cleaned.png",
+  "notes": {
+    "style": "Polished fantasy arcade, blue/gold/stone UI language matching Castle Fling.",
+    "transparentBackgrounds": true,
+    "uiAnchor": "center",
+    "recommendedRendering": "Use image-rendering:auto; object-fit:contain; preserve aspect ratio; avoid cropping source rects."
+  },
+  "items": [
+    {
+      "id": "treasury_ironwall_castle",
+      "displayName": "Ironwall Castle",
+      "file": "sprites/treasury/treasury_ironwall_castle.png",
+      "menuSlot": "row1_col1",
+      "cost": 30,
+      "currency": "crowns",
+      "category": "starting_castle",
+      "type": "unlock",
+      "shortDescription": "Unlock a fortress-style castle with mighty walls but slower gold income.",
+      "runtimeEffect": "Unlocks the Ironwall Castle starting keep. More max castle health/armor, reduced gold gain.",
+      "recommendedDisplaySize": {
+        "menuIcon": 52,
+        "upgradeCardIcon": 64,
+        "largePreviewHeight": 150
+      },
+      "anchor": "center",
+      "sourceSheetBox": [
+        58,
+        26,
+        449,
+        381
+      ],
+      "trimmedSize": [
+        408,
+        372
+      ]
+    },
+    {
+      "id": "treasury_spellspire_castle",
+      "displayName": "Spellspire Castle",
+      "file": "sprites/treasury/treasury_spellspire_castle.png",
+      "menuSlot": "row1_col2",
+      "cost": 50,
+      "currency": "crowns",
+      "category": "starting_castle",
+      "type": "unlock",
+      "shortDescription": "Unlock a magic-focused castle that begins with a Mage Tower.",
+      "runtimeEffect": "Unlocks Spellspire Castle. Starts with Mage Tower but has weaker starting walls.",
+      "recommendedDisplaySize": {
+        "menuIcon": 52,
+        "upgradeCardIcon": 64,
+        "largePreviewHeight": 150
+      },
+      "anchor": "center",
+      "sourceSheetBox": [
+        530,
+        27,
+        902,
+        386
+      ],
+      "trimmedSize": [
+        390,
+        376
+      ]
+    },
+    {
+      "id": "treasury_barracks_hold",
+      "displayName": "Barracks Hold",
+      "file": "sprites/treasury/treasury_barracks_hold.png",
+      "menuSlot": "row1_col3",
+      "cost": 50,
+      "currency": "crowns",
+      "category": "starting_castle",
+      "type": "unlock",
+      "shortDescription": "Unlock a castle built around converting enemies.",
+      "runtimeEffect": "Unlocks Barracks Hold. Stronger conversion playstyle and defender support.",
+      "recommendedDisplaySize": {
+        "menuIcon": 52,
+        "upgradeCardIcon": 64,
+        "largePreviewHeight": 150
+      },
+      "anchor": "center",
+      "sourceSheetBox": [
+        964,
+        67,
+        1362,
+        384
+      ],
+      "trimmedSize": [
+        416,
+        333
+      ]
+    },
+    {
+      "id": "treasury_titan_grip",
+      "displayName": "Titan Grip",
+      "file": "sprites/treasury/treasury_titan_grip.png",
+      "menuSlot": "row2_col1",
+      "cost": 40,
+      "currency": "crowns",
+      "category": "hand_power",
+      "type": "unlock",
+      "shortDescription": "Hand power: heavy enemies can be fully lifted.",
+      "runtimeEffect": "Allows heavier enemies to be lifted or held longer before slipping free.",
+      "recommendedDisplaySize": {
+        "menuIcon": 48,
+        "upgradeCardIcon": 60,
+        "largePreviewHeight": 130
+      },
+      "anchor": "center",
+      "sourceSheetBox": [
+        30,
+        415,
+        271,
+        706
+      ],
+      "trimmedSize": [
+        259,
+        307
+      ]
+    },
+    {
+      "id": "treasury_storm_fingers",
+      "displayName": "Storm Fingers",
+      "file": "sprites/treasury/treasury_storm_fingers.png",
+      "menuSlot": "row2_col2",
+      "cost": 60,
+      "currency": "crowns",
+      "category": "hand_power",
+      "type": "unlock",
+      "shortDescription": "Hand power: hard landings release a shock nova.",
+      "runtimeEffect": "Thrown enemies that hit the ground hard emit a small lightning shockwave.",
+      "recommendedDisplaySize": {
+        "menuIcon": 48,
+        "upgradeCardIcon": 60,
+        "largePreviewHeight": 130
+      },
+      "anchor": "center",
+      "sourceSheetBox": [
+        295,
+        441,
+        564,
+        704
+      ],
+      "trimmedSize": [
+        285,
+        279
+      ]
+    },
+    {
+      "id": "treasury_golden_touch",
+      "displayName": "Golden Touch",
+      "file": "sprites/treasury/treasury_golden_touch.png",
+      "menuSlot": "row2_col3",
+      "cost": 50,
+      "currency": "crowns",
+      "category": "economy",
+      "type": "perk",
+      "shortDescription": "+15% gold from all sources.",
+      "runtimeEffect": "Increases all gold rewards by 15%.",
+      "recommendedDisplaySize": {
+        "menuIcon": 48,
+        "upgradeCardIcon": 60,
+        "largePreviewHeight": 130
+      },
+      "anchor": "center",
+      "sourceSheetBox": [
+        600,
+        445,
+        827,
+        701
+      ],
+      "trimmedSize": [
+        244,
+        273
+      ]
+    },
+    {
+      "id": "treasury_ballista_variant",
+      "displayName": "Ballista Variant",
+      "file": "sprites/treasury/treasury_ballista_variant.png",
+      "menuSlot": "row3_col1",
+      "cost": 45,
+      "currency": "crowns",
+      "category": "tower_variant",
+      "type": "unlock",
+      "shortDescription": "Archer Tower fires slow piercing bolts instead.",
+      "runtimeEffect": "Unlocks an Archer Tower variant that fires slower but piercing projectiles.",
+      "recommendedDisplaySize": {
+        "menuIcon": 52,
+        "upgradeCardIcon": 64,
+        "largePreviewHeight": 130
+      },
+      "anchor": "center",
+      "sourceSheetBox": [
+        850,
+        450,
+        1158,
+        704
+      ],
+      "trimmedSize": [
+        304,
+        247
+      ]
+    },
+    {
+      "id": "treasury_chaos_contract",
+      "displayName": "Chaos Contract",
+      "file": "sprites/treasury/treasury_chaos_contract.png",
+      "menuSlot": "row3_col2",
+      "cost": 25,
+      "currency": "crowns",
+      "category": "risk_reward",
+      "type": "unlock",
+      "shortDescription": "Rare golden enemies appear, worth 5x gold.",
+      "runtimeEffect": "Adds rare golden enemies that are more valuable but can increase wave chaos.",
+      "recommendedDisplaySize": {
+        "menuIcon": 52,
+        "upgradeCardIcon": 64,
+        "largePreviewHeight": 130
+      },
+      "anchor": "center",
+      "sourceSheetBox": [
+        1190,
+        430,
+        1420,
+        700
+      ],
+      "trimmedSize": [
+        242,
+        259
+      ]
+    },
+    {
+      "id": "treasury_nightmare_sigil",
+      "displayName": "Nightmare Sigil",
+      "file": "sprites/treasury/treasury_nightmare_sigil.png",
+      "menuSlot": "row3_col3",
+      "cost": 80,
+      "currency": "crowns",
+      "category": "challenge_mode",
+      "type": "unlock",
+      "shortDescription": "Unlock Nightmare mode: brutal enemies, double crowns.",
+      "runtimeEffect": "Unlocks Nightmare mode. Stronger enemies and double crown rewards.",
+      "recommendedDisplaySize": {
+        "menuIcon": 48,
+        "upgradeCardIcon": 60,
+        "largePreviewHeight": 130
+      },
+      "anchor": "center",
+      "sourceSheetBox": [
+        33,
+        750,
+        290,
+        1036
+      ],
+      "trimmedSize": [
+        275,
+        303
+      ]
+    },
+    {
+      "id": "treasury_spectral_hand",
+      "displayName": "Spectral Hand",
+      "file": "sprites/treasury/treasury_spectral_hand.png",
+      "menuSlot": "row4_col1",
+      "cost": 20,
+      "currency": "crowns",
+      "category": "cosmetic",
+      "type": "cosmetic",
+      "shortDescription": "Cosmetic: a ghostly blue hand. Click to equip.",
+      "runtimeEffect": "Unlocks/equips the Spectral Hand cursor cosmetic.",
+      "recommendedDisplaySize": {
+        "menuIcon": 48,
+        "upgradeCardIcon": 60,
+        "largePreviewHeight": 130
+      },
+      "anchor": "center",
+      "sourceSheetBox": [
+        327,
+        751,
+        531,
+        1038
+      ],
+      "trimmedSize": [
+        227,
+        305
+      ]
+    },
+    {
+      "id": "treasury_royal_gauntlet",
+      "displayName": "Royal Gauntlet",
+      "file": "sprites/treasury/treasury_royal_gauntlet.png",
+      "menuSlot": "row4_col2",
+      "cost": 30,
+      "currency": "crowns",
+      "category": "cosmetic",
+      "type": "cosmetic",
+      "shortDescription": "Cosmetic: a gilded royal gauntlet. Click to equip.",
+      "runtimeEffect": "Unlocks/equips the Royal Gauntlet cursor cosmetic.",
+      "recommendedDisplaySize": {
+        "menuIcon": 48,
+        "upgradeCardIcon": 60,
+        "largePreviewHeight": 130
+      },
+      "anchor": "center",
+      "sourceSheetBox": [
+        589,
+        737,
+        822,
+        1037
+      ],
+      "trimmedSize": [
+        252,
+        317
+      ]
+    },
+    {
+      "id": "treasury_crimson_banners",
+      "displayName": "Crimson Banners",
+      "file": "sprites/treasury/treasury_crimson_banners.png",
+      "menuSlot": "row4_col3",
+      "cost": 10,
+      "currency": "crowns",
+      "category": "cosmetic",
+      "type": "cosmetic",
+      "shortDescription": "Cosmetic: dye your castle banners crimson.",
+      "runtimeEffect": "Unlocks/equips crimson castle banner cosmetic.",
+      "recommendedDisplaySize": {
+        "menuIcon": 44,
+        "upgradeCardIcon": 58,
+        "largePreviewHeight": 130
+      },
+      "anchor": "center",
+      "sourceSheetBox": [
+        898,
+        732,
+        1109,
+        1037
+      ],
+      "trimmedSize": [
+        227,
+        322
+      ]
+    },
+    {
+      "id": "treasury_azure_banners",
+      "displayName": "Azure Banners",
+      "file": "sprites/treasury/treasury_azure_banners.png",
+      "menuSlot": "row5_col1",
+      "cost": 10,
+      "currency": "crowns",
+      "category": "cosmetic",
+      "type": "cosmetic",
+      "shortDescription": "Cosmetic: dye your castle banners azure.",
+      "runtimeEffect": "Unlocks/equips azure castle banner cosmetic.",
+      "recommendedDisplaySize": {
+        "menuIcon": 44,
+        "upgradeCardIcon": 58,
+        "largePreviewHeight": 130
+      },
+      "anchor": "center",
+      "sourceSheetBox": [
+        1177,
+        733,
+        1388,
+        1035
+      ],
+      "trimmedSize": [
+        228,
+        318
+      ]
+    }
+  ]
+}

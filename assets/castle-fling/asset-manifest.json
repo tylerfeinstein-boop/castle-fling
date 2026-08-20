@@ -1,0 +1,817 @@
+{
+  "game": "Castle Fling",
+  "version": "asset-prep-1.0",
+  "notes": "Transparent PNG assets cropped from generated sheets and named for direct game integration.",
+  "assets": {
+    "logo_castle_fling": {
+      "id": "logo_castle_fling",
+      "category": "branding",
+      "role": "main_logo",
+      "path": "branding/logo_castle_fling.png",
+      "source": "logo-transparent.png",
+      "width": 1252,
+      "height": 949,
+      "anchor": "center"
+    },
+    "bg_castle_battlefield": {
+      "id": "bg_castle_battlefield",
+      "category": "background",
+      "role": "battlefield_foreground_layer",
+      "path": "backgrounds/bg_castle_battlefield.png",
+      "source": "background-scene-transparent.png",
+      "width": 1692,
+      "height": 930,
+      "anchor": "center-bottom"
+    },
+    "upgrade_archer_tower": {
+      "id": "upgrade_archer_tower",
+      "category": "upgrade",
+      "role": "Archer Tower",
+      "path": "sprites/upgrades/upgrade_archer_tower.png",
+      "source": "castle-upgrades-transparent.png",
+      "width": 266,
+      "height": 308,
+      "anchor": "center-bottom"
+    },
+    "upgrade_mason_room": {
+      "id": "upgrade_mason_room",
+      "category": "upgrade",
+      "role": "Mason Room",
+      "path": "sprites/upgrades/upgrade_mason_room.png",
+      "source": "castle-upgrades-transparent.png",
+      "width": 298,
+      "height": 313,
+      "anchor": "center-bottom"
+    },
+    "upgrade_mage_tower": {
+      "id": "upgrade_mage_tower",
+      "category": "upgrade",
+      "role": "Mage Tower",
+      "path": "sprites/upgrades/upgrade_mage_tower.png",
+      "source": "castle-upgrades-transparent.png",
+      "width": 368,
+      "height": 339,
+      "anchor": "center-bottom"
+    },
+    "upgrade_bomb_workshop": {
+      "id": "upgrade_bomb_workshop",
+      "category": "upgrade",
+      "role": "Bomb Workshop",
+      "path": "sprites/upgrades/upgrade_bomb_workshop.png",
+      "source": "castle-upgrades-transparent.png",
+      "width": 305,
+      "height": 310,
+      "anchor": "center-bottom"
+    },
+    "upgrade_conversion_barracks": {
+      "id": "upgrade_conversion_barracks",
+      "category": "upgrade",
+      "role": "Conversion Barracks",
+      "path": "sprites/upgrades/upgrade_conversion_barracks.png",
+      "source": "castle-upgrades-transparent.png",
+      "width": 290,
+      "height": 334,
+      "anchor": "center-bottom"
+    },
+    "upgrade_wall_forge": {
+      "id": "upgrade_wall_forge",
+      "category": "upgrade",
+      "role": "Wall Forge",
+      "path": "sprites/upgrades/upgrade_wall_forge.png",
+      "source": "castle-upgrades-transparent.png",
+      "width": 384,
+      "height": 342,
+      "anchor": "center-bottom"
+    },
+    "upgrade_reinforced_gate": {
+      "id": "upgrade_reinforced_gate",
+      "category": "upgrade",
+      "role": "Reinforced Gate",
+      "path": "sprites/upgrades/upgrade_reinforced_gate.png",
+      "source": "castle-upgrades-transparent.png",
+      "width": 342,
+      "height": 342,
+      "anchor": "center-bottom"
+    },
+    "upgrade_panic_bell_tower": {
+      "id": "upgrade_panic_bell_tower",
+      "category": "upgrade",
+      "role": "Panic Bell Tower",
+      "path": "sprites/upgrades/upgrade_panic_bell_tower.png",
+      "source": "castle-upgrades-transparent.png",
+      "width": 256,
+      "height": 342,
+      "anchor": "center-bottom"
+    },
+    "upgrade_glue_trap_cauldron": {
+      "id": "upgrade_glue_trap_cauldron",
+      "category": "upgrade",
+      "role": "Glue Trap Cauldron",
+      "path": "sprites/upgrades/upgrade_glue_trap_cauldron.png",
+      "source": "castle-upgrades-transparent.png",
+      "width": 303,
+      "height": 292,
+      "anchor": "center-bottom"
+    },
+    "upgrade_junk_cannon": {
+      "id": "upgrade_junk_cannon",
+      "category": "upgrade",
+      "role": "Junk Cannon",
+      "path": "sprites/upgrades/upgrade_junk_cannon.png",
+      "source": "castle-upgrades-transparent.png",
+      "width": 311,
+      "height": 266,
+      "anchor": "center-bottom"
+    },
+    "upgrade_shield_generator": {
+      "id": "upgrade_shield_generator",
+      "category": "upgrade",
+      "role": "Shield Generator",
+      "path": "sprites/upgrades/upgrade_shield_generator.png",
+      "source": "castle-upgrades-transparent.png",
+      "width": 384,
+      "height": 293,
+      "anchor": "center-bottom"
+    },
+    "upgrade_gold_vault": {
+      "id": "upgrade_gold_vault",
+      "category": "upgrade",
+      "role": "Gold Vault",
+      "path": "sprites/upgrades/upgrade_gold_vault.png",
+      "source": "castle-upgrades-transparent.png",
+      "width": 302,
+      "height": 297,
+      "anchor": "center-bottom"
+    },
+    "enemy_runner": {
+      "id": "enemy_runner",
+      "category": "enemy",
+      "role": "Runner",
+      "path": "sprites/enemies/enemy_runner.png",
+      "source": "enemies-transparent.png",
+      "width": 269,
+      "height": 244,
+      "anchor": "center-bottom"
+    },
+    "enemy_soldier": {
+      "id": "enemy_soldier",
+      "category": "enemy",
+      "role": "Soldier",
+      "path": "sprites/enemies/enemy_soldier.png",
+      "source": "enemies-transparent.png",
+      "width": 375,
+      "height": 296,
+      "anchor": "center-bottom"
+    },
+    "enemy_shieldbearer": {
+      "id": "enemy_shieldbearer",
+      "category": "enemy",
+      "role": "Shieldbearer",
+      "path": "sprites/enemies/enemy_shieldbearer.png",
+      "source": "enemies-transparent.png",
+      "width": 384,
+      "height": 301,
+      "anchor": "center-bottom"
+    },
+    "enemy_hammer_brute": {
+      "id": "enemy_hammer_brute",
+      "category": "enemy",
+      "role": "Hammer Brute",
+      "path": "sprites/enemies/enemy_hammer_brute.png",
+      "source": "enemies-transparent.png",
+      "width": 313,
+      "height": 319,
+      "anchor": "center-bottom"
+    },
+    "enemy_bomb_carrier": {
+      "id": "enemy_bomb_carrier",
+      "category": "enemy",
+      "role": "Bomb Carrier",
+      "path": "sprites/enemies/enemy_bomb_carrier.png",
+      "source": "enemies-transparent.png",
+      "width": 325,
+      "height": 339,
+      "anchor": "center-bottom"
+    },
+    "enemy_healer": {
+      "id": "enemy_healer",
+      "category": "enemy",
+      "role": "Healer",
+      "path": "sprites/enemies/enemy_healer.png",
+      "source": "enemies-transparent.png",
+      "width": 384,
+      "height": 339,
+      "anchor": "center-bottom"
+    },
+    "enemy_banner_carrier": {
+      "id": "enemy_banner_carrier",
+      "category": "enemy",
+      "role": "Banner Carrier",
+      "path": "sprites/enemies/enemy_banner_carrier.png",
+      "source": "enemies-transparent.png",
+      "width": 384,
+      "height": 342,
+      "anchor": "center-bottom"
+    },
+    "enemy_heavy_knight": {
+      "id": "enemy_heavy_knight",
+      "category": "enemy",
+      "role": "Heavy Knight",
+      "path": "sprites/enemies/enemy_heavy_knight.png",
+      "source": "enemies-transparent.png",
+      "width": 166,
+      "height": 316,
+      "anchor": "center-bottom"
+    },
+    "enemy_wall_climber": {
+      "id": "enemy_wall_climber",
+      "category": "enemy",
+      "role": "Wall Climber",
+      "path": "sprites/enemies/enemy_wall_climber.png",
+      "source": "enemies-transparent.png",
+      "width": 334,
+      "height": 302,
+      "anchor": "center-bottom"
+    },
+    "enemy_siege_captain": {
+      "id": "enemy_siege_captain",
+      "category": "enemy",
+      "role": "Siege Captain",
+      "path": "sprites/enemies/enemy_siege_captain.png",
+      "source": "enemies-transparent.png",
+      "width": 384,
+      "height": 307,
+      "anchor": "center-bottom"
+    },
+    "siege_bomb_cart": {
+      "id": "siege_bomb_cart",
+      "category": "enemy",
+      "role": "Bomb Cart",
+      "path": "sprites/enemies/siege_bomb_cart.png",
+      "source": "enemies-transparent.png",
+      "width": 384,
+      "height": 304,
+      "anchor": "center-bottom"
+    },
+    "siege_twin_ram": {
+      "id": "siege_twin_ram",
+      "category": "enemy",
+      "role": "Twin Ram",
+      "path": "sprites/enemies/siege_twin_ram.png",
+      "source": "enemies-transparent.png",
+      "width": 355,
+      "height": 302,
+      "anchor": "center-bottom"
+    },
+    "char_runner_reference": {
+      "id": "char_runner_reference",
+      "category": "enemy_reference",
+      "role": "Runner Reference",
+      "path": "sprites/enemies/char_runner_reference.png",
+      "source": "character-models-transparent.png",
+      "width": 285,
+      "height": 289,
+      "anchor": "center"
+    },
+    "char_soldier_reference": {
+      "id": "char_soldier_reference",
+      "category": "enemy_reference",
+      "role": "Soldier Reference",
+      "path": "sprites/enemies/char_soldier_reference.png",
+      "source": "character-models-transparent.png",
+      "width": 273,
+      "height": 344,
+      "anchor": "center"
+    },
+    "char_shieldbearer_reference": {
+      "id": "char_shieldbearer_reference",
+      "category": "enemy_reference",
+      "role": "Shieldbearer Reference",
+      "path": "sprites/enemies/char_shieldbearer_reference.png",
+      "source": "character-models-transparent.png",
+      "width": 266,
+      "height": 324,
+      "anchor": "center"
+    },
+    "char_hammer_brute_reference": {
+      "id": "char_hammer_brute_reference",
+      "category": "enemy_reference",
+      "role": "Hammer Brute Reference",
+      "path": "sprites/enemies/char_hammer_brute_reference.png",
+      "source": "character-models-transparent.png",
+      "width": 313,
+      "height": 331,
+      "anchor": "center"
+    },
+    "char_bomb_carrier_reference": {
+      "id": "char_bomb_carrier_reference",
+      "category": "enemy_reference",
+      "role": "Bomb Carrier Reference",
+      "path": "sprites/enemies/char_bomb_carrier_reference.png",
+      "source": "character-models-transparent.png",
+      "width": 235,
+      "height": 326,
+      "anchor": "center"
+    },
+    "char_healer_reference": {
+      "id": "char_healer_reference",
+      "category": "enemy_reference",
+      "role": "Healer Reference",
+      "path": "sprites/enemies/char_healer_reference.png",
+      "source": "character-models-transparent.png",
+      "width": 275,
+      "height": 342,
+      "anchor": "center"
+    },
+    "char_banner_carrier_reference": {
+      "id": "char_banner_carrier_reference",
+      "category": "enemy_reference",
+      "role": "Banner Carrier Reference",
+      "path": "sprites/enemies/char_banner_carrier_reference.png",
+      "source": "character-models-transparent.png",
+      "width": 294,
+      "height": 404,
+      "anchor": "center"
+    },
+    "char_heavy_knight_reference": {
+      "id": "char_heavy_knight_reference",
+      "category": "enemy_reference",
+      "role": "Heavy Knight Reference",
+      "path": "sprites/enemies/char_heavy_knight_reference.png",
+      "source": "character-models-transparent.png",
+      "width": 415,
+      "height": 367,
+      "anchor": "center"
+    },
+    "defender_archer": {
+      "id": "defender_archer",
+      "category": "defender",
+      "role": "Archer Defender",
+      "path": "sprites/defenders/defender_archer.png",
+      "source": "character-models-transparent.png",
+      "width": 333,
+      "height": 321,
+      "anchor": "center-bottom"
+    },
+    "defender_mage": {
+      "id": "defender_mage",
+      "category": "defender",
+      "role": "Mage Defender",
+      "path": "sprites/defenders/defender_mage.png",
+      "source": "character-models-transparent.png",
+      "width": 298,
+      "height": 348,
+      "anchor": "center-bottom"
+    },
+    "defender_mason": {
+      "id": "defender_mason",
+      "category": "defender",
+      "role": "Mason Defender",
+      "path": "sprites/defenders/defender_mason.png",
+      "source": "character-models-transparent.png",
+      "width": 317,
+      "height": 326,
+      "anchor": "center-bottom"
+    },
+    "ui_play_round_normal": {
+      "id": "ui_play_round_normal",
+      "category": "ui_button",
+      "role": "Play Round Normal",
+      "path": "ui/buttons/ui_play_round_normal.png",
+      "source": "ui-buttons-transparent.png",
+      "width": 163,
+      "height": 154,
+      "anchor": "center"
+    },
+    "ui_play_round_glow": {
+      "id": "ui_play_round_glow",
+      "category": "ui_button",
+      "role": "Play Round Glow",
+      "path": "ui/buttons/ui_play_round_glow.png",
+      "source": "ui-buttons-transparent.png",
+      "width": 182,
+      "height": 154,
+      "anchor": "center"
+    },
+    "ui_play_round_disabled": {
+      "id": "ui_play_round_disabled",
+      "category": "ui_button",
+      "role": "Play Round Disabled",
+      "path": "ui/buttons/ui_play_round_disabled.png",
+      "source": "ui-buttons-transparent.png",
+      "width": 192,
+      "height": 154,
+      "anchor": "center"
+    },
+    "ui_play_round_premium": {
+      "id": "ui_play_round_premium",
+      "category": "ui_button",
+      "role": "Play Round Premium",
+      "path": "ui/buttons/ui_play_round_premium.png",
+      "source": "ui-buttons-transparent.png",
+      "width": 192,
+      "height": 161,
+      "anchor": "center"
+    },
+    "ui_play_rect_normal": {
+      "id": "ui_play_rect_normal",
+      "category": "ui_button",
+      "role": "Play Rect Normal",
+      "path": "ui/buttons/ui_play_rect_normal.png",
+      "source": "ui-buttons-transparent.png",
+      "width": 192,
+      "height": 138,
+      "anchor": "center"
+    },
+    "ui_play_rect_glow": {
+      "id": "ui_play_rect_glow",
+      "category": "ui_button",
+      "role": "Play Rect Glow",
+      "path": "ui/buttons/ui_play_rect_glow.png",
+      "source": "ui-buttons-transparent.png",
+      "width": 192,
+      "height": 138,
+      "anchor": "center"
+    },
+    "ui_play_rect_disabled": {
+      "id": "ui_play_rect_disabled",
+      "category": "ui_button",
+      "role": "Play Rect Disabled",
+      "path": "ui/buttons/ui_play_rect_disabled.png",
+      "source": "ui-buttons-transparent.png",
+      "width": 192,
+      "height": 140,
+      "anchor": "center"
+    },
+    "ui_play_rect_premium": {
+      "id": "ui_play_rect_premium",
+      "category": "ui_button",
+      "role": "Play Rect Premium",
+      "path": "ui/buttons/ui_play_rect_premium.png",
+      "source": "ui-buttons-transparent.png",
+      "width": 166,
+      "height": 157,
+      "anchor": "center"
+    },
+    "ui_pause_round_normal": {
+      "id": "ui_pause_round_normal",
+      "category": "ui_button",
+      "role": "Pause Round Normal",
+      "path": "ui/buttons/ui_pause_round_normal.png",
+      "source": "ui-buttons-transparent.png",
+      "width": 161,
+      "height": 170,
+      "anchor": "center"
+    },
+    "ui_pause_round_glow": {
+      "id": "ui_pause_round_glow",
+      "category": "ui_button",
+      "role": "Pause Round Glow",
+      "path": "ui/buttons/ui_pause_round_glow.png",
+      "source": "ui-buttons-transparent.png",
+      "width": 182,
+      "height": 170,
+      "anchor": "center"
+    },
+    "ui_pause_round_disabled": {
+      "id": "ui_pause_round_disabled",
+      "category": "ui_button",
+      "role": "Pause Round Disabled",
+      "path": "ui/buttons/ui_pause_round_disabled.png",
+      "source": "ui-buttons-transparent.png",
+      "width": 192,
+      "height": 170,
+      "anchor": "center"
+    },
+    "ui_pause_round_premium": {
+      "id": "ui_pause_round_premium",
+      "category": "ui_button",
+      "role": "Pause Round Premium",
+      "path": "ui/buttons/ui_pause_round_premium.png",
+      "source": "ui-buttons-transparent.png",
+      "width": 192,
+      "height": 170,
+      "anchor": "center"
+    },
+    "ui_pause_rect_normal": {
+      "id": "ui_pause_rect_normal",
+      "category": "ui_button",
+      "role": "Pause Rect Normal",
+      "path": "ui/buttons/ui_pause_rect_normal.png",
+      "source": "ui-buttons-transparent.png",
+      "width": 192,
+      "height": 132,
+      "anchor": "center"
+    },
+    "ui_pause_rect_glow": {
+      "id": "ui_pause_rect_glow",
+      "category": "ui_button",
+      "role": "Pause Rect Glow",
+      "path": "ui/buttons/ui_pause_rect_glow.png",
+      "source": "ui-buttons-transparent.png",
+      "width": 192,
+      "height": 132,
+      "anchor": "center"
+    },
+    "ui_pause_rect_disabled": {
+      "id": "ui_pause_rect_disabled",
+      "category": "ui_button",
+      "role": "Pause Rect Disabled",
+      "path": "ui/buttons/ui_pause_rect_disabled.png",
+      "source": "ui-buttons-transparent.png",
+      "width": 192,
+      "height": 131,
+      "anchor": "center"
+    },
+    "ui_pause_rect_premium": {
+      "id": "ui_pause_rect_premium",
+      "category": "ui_button",
+      "role": "Pause Rect Premium",
+      "path": "ui/buttons/ui_pause_rect_premium.png",
+      "source": "ui-buttons-transparent.png",
+      "width": 166,
+      "height": 170,
+      "anchor": "center"
+    },
+    "ui_settings_round_normal": {
+      "id": "ui_settings_round_normal",
+      "category": "ui_button",
+      "role": "Settings Round Normal",
+      "path": "ui/buttons/ui_settings_round_normal.png",
+      "source": "ui-buttons-transparent.png",
+      "width": 160,
+      "height": 171,
+      "anchor": "center"
+    },
+    "ui_settings_round_glow": {
+      "id": "ui_settings_round_glow",
+      "category": "ui_button",
+      "role": "Settings Round Glow",
+      "path": "ui/buttons/ui_settings_round_glow.png",
+      "source": "ui-buttons-transparent.png",
+      "width": 182,
+      "height": 171,
+      "anchor": "center"
+    },
+    "ui_settings_round_disabled": {
+      "id": "ui_settings_round_disabled",
+      "category": "ui_button",
+      "role": "Settings Round Disabled",
+      "path": "ui/buttons/ui_settings_round_disabled.png",
+      "source": "ui-buttons-transparent.png",
+      "width": 192,
+      "height": 171,
+      "anchor": "center"
+    },
+    "ui_settings_round_premium": {
+      "id": "ui_settings_round_premium",
+      "category": "ui_button",
+      "role": "Settings Round Premium",
+      "path": "ui/buttons/ui_settings_round_premium.png",
+      "source": "ui-buttons-transparent.png",
+      "width": 192,
+      "height": 171,
+      "anchor": "center"
+    },
+    "ui_settings_rect_normal": {
+      "id": "ui_settings_rect_normal",
+      "category": "ui_button",
+      "role": "Settings Rect Normal",
+      "path": "ui/buttons/ui_settings_rect_normal.png",
+      "source": "ui-buttons-transparent.png",
+      "width": 192,
+      "height": 171,
+      "anchor": "center"
+    },
+    "ui_settings_rect_glow": {
+      "id": "ui_settings_rect_glow",
+      "category": "ui_button",
+      "role": "Settings Rect Glow",
+      "path": "ui/buttons/ui_settings_rect_glow.png",
+      "source": "ui-buttons-transparent.png",
+      "width": 192,
+      "height": 171,
+      "anchor": "center"
+    },
+    "ui_settings_rect_disabled": {
+      "id": "ui_settings_rect_disabled",
+      "category": "ui_button",
+      "role": "Settings Rect Disabled",
+      "path": "ui/buttons/ui_settings_rect_disabled.png",
+      "source": "ui-buttons-transparent.png",
+      "width": 192,
+      "height": 171,
+      "anchor": "center"
+    },
+    "ui_settings_rect_premium": {
+      "id": "ui_settings_rect_premium",
+      "category": "ui_button",
+      "role": "Settings Rect Premium",
+      "path": "ui/buttons/ui_settings_rect_premium.png",
+      "source": "ui-buttons-transparent.png",
+      "width": 165,
+      "height": 171,
+      "anchor": "center"
+    },
+    "ui_restart_round_normal": {
+      "id": "ui_restart_round_normal",
+      "category": "ui_button",
+      "role": "Restart Round Normal",
+      "path": "ui/buttons/ui_restart_round_normal.png",
+      "source": "ui-buttons-transparent.png",
+      "width": 159,
+      "height": 171,
+      "anchor": "center"
+    },
+    "ui_restart_round_glow": {
+      "id": "ui_restart_round_glow",
+      "category": "ui_button",
+      "role": "Restart Round Glow",
+      "path": "ui/buttons/ui_restart_round_glow.png",
+      "source": "ui-buttons-transparent.png",
+      "width": 183,
+      "height": 171,
+      "anchor": "center"
+    },
+    "ui_restart_round_disabled": {
+      "id": "ui_restart_round_disabled",
+      "category": "ui_button",
+      "role": "Restart Round Disabled",
+      "path": "ui/buttons/ui_restart_round_disabled.png",
+      "source": "ui-buttons-transparent.png",
+      "width": 192,
+      "height": 171,
+      "anchor": "center"
+    },
+    "ui_restart_round_premium": {
+      "id": "ui_restart_round_premium",
+      "category": "ui_button",
+      "role": "Restart Round Premium",
+      "path": "ui/buttons/ui_restart_round_premium.png",
+      "source": "ui-buttons-transparent.png",
+      "width": 192,
+      "height": 171,
+      "anchor": "center"
+    },
+    "ui_restart_rect_normal": {
+      "id": "ui_restart_rect_normal",
+      "category": "ui_button",
+      "role": "Restart Rect Normal",
+      "path": "ui/buttons/ui_restart_rect_normal.png",
+      "source": "ui-buttons-transparent.png",
+      "width": 192,
+      "height": 139,
+      "anchor": "center"
+    },
+    "ui_restart_rect_glow": {
+      "id": "ui_restart_rect_glow",
+      "category": "ui_button",
+      "role": "Restart Rect Glow",
+      "path": "ui/buttons/ui_restart_rect_glow.png",
+      "source": "ui-buttons-transparent.png",
+      "width": 192,
+      "height": 139,
+      "anchor": "center"
+    },
+    "ui_restart_rect_disabled": {
+      "id": "ui_restart_rect_disabled",
+      "category": "ui_button",
+      "role": "Restart Rect Disabled",
+      "path": "ui/buttons/ui_restart_rect_disabled.png",
+      "source": "ui-buttons-transparent.png",
+      "width": 192,
+      "height": 137,
+      "anchor": "center"
+    },
+    "ui_restart_rect_premium": {
+      "id": "ui_restart_rect_premium",
+      "category": "ui_button",
+      "role": "Restart Rect Premium",
+      "path": "ui/buttons/ui_restart_rect_premium.png",
+      "source": "ui-buttons-transparent.png",
+      "width": 165,
+      "height": 171,
+      "anchor": "center"
+    },
+    "icon_upgrade": {
+      "id": "icon_upgrade",
+      "category": "ui_icon",
+      "role": "Upgrade Icon",
+      "path": "ui/icons/icon_upgrade.png",
+      "source": "ui-buttons-transparent.png",
+      "width": 160,
+      "height": 164,
+      "anchor": "center"
+    },
+    "icon_repair": {
+      "id": "icon_repair",
+      "category": "ui_icon",
+      "role": "Repair Icon",
+      "path": "ui/icons/icon_repair.png",
+      "source": "ui-buttons-transparent.png",
+      "width": 161,
+      "height": 164,
+      "anchor": "center"
+    },
+    "icon_convert": {
+      "id": "icon_convert",
+      "category": "ui_icon",
+      "role": "Convert Icon",
+      "path": "ui/icons/icon_convert.png",
+      "source": "ui-buttons-transparent.png",
+      "width": 161,
+      "height": 164,
+      "anchor": "center"
+    },
+    "icon_archer": {
+      "id": "icon_archer",
+      "category": "ui_icon",
+      "role": "Archer Icon",
+      "path": "ui/icons/icon_archer.png",
+      "source": "ui-buttons-transparent.png",
+      "width": 162,
+      "height": 167,
+      "anchor": "center"
+    },
+    "icon_mage": {
+      "id": "icon_mage",
+      "category": "ui_icon",
+      "role": "Mage Icon",
+      "path": "ui/icons/icon_mage.png",
+      "source": "ui-buttons-transparent.png",
+      "width": 161,
+      "height": 165,
+      "anchor": "center"
+    },
+    "icon_bomb": {
+      "id": "icon_bomb",
+      "category": "ui_icon",
+      "role": "Bomb Icon",
+      "path": "ui/icons/icon_bomb.png",
+      "source": "ui-buttons-transparent.png",
+      "width": 162,
+      "height": 165,
+      "anchor": "center"
+    },
+    "icon_shield": {
+      "id": "icon_shield",
+      "category": "ui_icon",
+      "role": "Shield Icon",
+      "path": "ui/icons/icon_shield.png",
+      "source": "ui-buttons-transparent.png",
+      "width": 161,
+      "height": 164,
+      "anchor": "center"
+    },
+    "icon_crown_gold": {
+      "id": "icon_crown_gold",
+      "category": "ui_icon",
+      "role": "Gold Crown Icon",
+      "path": "ui/icons/icon_crown_gold.png",
+      "source": "ui-buttons-transparent.png",
+      "width": 162,
+      "height": 170,
+      "anchor": "center"
+    },
+    "icon_sound_on": {
+      "id": "icon_sound_on",
+      "category": "ui_icon",
+      "role": "Sound On Icon",
+      "path": "ui/icons/icon_sound_on.png",
+      "source": "ui-buttons-transparent.png",
+      "width": 160,
+      "height": 159,
+      "anchor": "center"
+    },
+    "icon_sound_off": {
+      "id": "icon_sound_off",
+      "category": "ui_icon",
+      "role": "Sound Off Icon",
+      "path": "ui/icons/icon_sound_off.png",
+      "source": "ui-buttons-transparent.png",
+      "width": 162,
+      "height": 159,
+      "anchor": "center"
+    },
+    "icon_home": {
+      "id": "icon_home",
+      "category": "ui_icon",
+      "role": "Home/Menu Icon",
+      "path": "ui/icons/icon_home.png",
+      "source": "ui-buttons-transparent.png",
+      "width": 192,
+      "height": 160,
+      "anchor": "center"
+    },
+    "icon_close": {
+      "id": "icon_close",
+      "category": "ui_icon",
+      "role": "Close Icon",
+      "path": "ui/icons/icon_close.png",
+      "source": "ui-buttons-transparent.png",
+      "width": 146,
+      "height": 159,
+      "anchor": "center"
+    }
+  }
+}

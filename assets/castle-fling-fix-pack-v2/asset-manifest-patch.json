@@ -1,0 +1,106 @@
+{
+  "pack": "castle-fling-enemy-direction-fix",
+  "version": "1.1-patch",
+  "install": "Overlay this folder on top of assets/castle-fling-fix-pack/ so sprites/enemies/* replaces the existing enemy files.",
+  "changed": "Corrected enemy filenames and flipped enemy_siege_captain.png to face left toward the castle.",
+  "sprites": {
+    "enemies": [
+      {
+        "id": "enemy_banner_carrier",
+        "file": "sprites/enemies/enemy_banner_carrier.png",
+        "size": [
+          254,
+          369
+        ]
+      },
+      {
+        "id": "enemy_bomb_carrier",
+        "file": "sprites/enemies/enemy_bomb_carrier.png",
+        "size": [
+          195,
+          283
+        ]
+      },
+      {
+        "id": "enemy_bomb_cart",
+        "file": "sprites/enemies/enemy_bomb_cart.png",
+        "size": [
+          325,
+          299
+        ]
+      },
+      {
+        "id": "enemy_hammer_brute",
+        "file": "sprites/enemies/enemy_hammer_brute.png",
+        "size": [
+          374,
+          296
+        ]
+      },
+      {
+        "id": "enemy_healer",
+        "file": "sprites/enemies/enemy_healer.png",
+        "size": [
+          290,
+          287
+        ]
+      },
+      {
+        "id": "enemy_heavy_knight",
+        "file": "sprites/enemies/enemy_heavy_knight.png",
+        "size": [
+          255,
+          303
+        ]
+      },
+      {
+        "id": "enemy_runner",
+        "file": "sprites/enemies/enemy_runner.png",
+        "size": [
+          259,
+          234
+        ]
+      },
+      {
+        "id": "enemy_shieldbearer",
+        "file": "sprites/enemies/enemy_shieldbearer.png",
+        "size": [
+          232,
+          297
+        ]
+      },
+      {
+        "id": "enemy_siege_captain",
+        "file": "sprites/enemies/enemy_siege_captain.png",
+        "size": [
+          345,
+          334
+        ]
+      },
+      {
+        "id": "enemy_soldier",
+        "file": "sprites/enemies/enemy_soldier.png",
+        "size": [
+          282,
+          292
+        ]
+      },
+      {
+        "id": "enemy_twin_ram",
+        "file": "sprites/enemies/enemy_twin_ram.png",
+        "size": [
+          374,
+          277
+        ]
+      },
+      {
+        "id": "enemy_wall_climber",
+        "file": "sprites/enemies/enemy_wall_climber.png",
+        "size": [
+          223,
+          304
+        ]
+      }
+    ]
+  }
+}

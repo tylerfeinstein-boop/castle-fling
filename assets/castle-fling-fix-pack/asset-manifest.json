@@ -1,0 +1,407 @@
+{
+  "pack": "castle-fling-fix-pack",
+  "version": "1.0",
+  "background": {
+    "id": "bg_battlefield_scenic_valley_v2",
+    "file": "backgrounds/bg_battlefield_scenic_valley_v2.png",
+    "size": [
+      1672,
+      941
+    ],
+    "notes": "Use this as the main scenic battlefield background. Ground line is near the lower quarter; keep enemies and castle objects anchored to the visible grass platform."
+  },
+  "sprites": {
+    "upgrades": [
+      {
+        "id": "upgrade_archer_platform",
+        "file": "sprites/upgrades/upgrade_archer_platform.png",
+        "source_box": [
+          375,
+          93,
+          654,
+          487
+        ],
+        "size": [
+          251,
+          367
+        ]
+      },
+      {
+        "id": "upgrade_crystal_tower",
+        "file": "sprites/upgrades/upgrade_crystal_tower.png",
+        "source_box": [
+          679,
+          102,
+          1014,
+          480
+        ],
+        "size": [
+          307,
+          350
+        ]
+      },
+      {
+        "id": "upgrade_mason_workshop",
+        "file": "sprites/upgrades/upgrade_mason_workshop.png",
+        "source_box": [
+          57,
+          110,
+          350,
+          485
+        ],
+        "size": [
+          266,
+          347
+        ]
+      },
+      {
+        "id": "upgrade_bomb_workshop",
+        "file": "sprites/upgrades/upgrade_bomb_workshop.png",
+        "source_box": [
+          1034,
+          154,
+          1393,
+          507
+        ],
+        "size": [
+          331,
+          325
+        ]
+      },
+      {
+        "id": "upgrade_fortified_wall",
+        "file": "sprites/upgrades/upgrade_fortified_wall.png",
+        "source_box": [
+          433,
+          476,
+          664,
+          954
+        ],
+        "size": [
+          203,
+          450
+        ]
+      },
+      {
+        "id": "upgrade_panic_bell_tower",
+        "file": "sprites/upgrades/upgrade_panic_bell_tower.png",
+        "source_box": [
+          47,
+          569,
+          358,
+          935
+        ],
+        "size": [
+          283,
+          338
+        ]
+      },
+      {
+        "id": "upgrade_shield_generator",
+        "file": "sprites/upgrades/upgrade_shield_generator.png",
+        "source_box": [
+          734,
+          592,
+          1001,
+          929
+        ],
+        "size": [
+          239,
+          323
+        ]
+      },
+      {
+        "id": "upgrade_gold_vault",
+        "file": "sprites/upgrades/upgrade_gold_vault.png",
+        "source_box": [
+          1051,
+          597,
+          1375,
+          918
+        ],
+        "size": [
+          296,
+          293
+        ]
+      }
+    ],
+    "enemies": [
+      {
+        "id": "enemy_runner",
+        "file": "sprites/enemies/enemy_runner.png",
+        "source_box": [
+          942,
+          25,
+          1344,
+          349
+        ],
+        "size": [
+          374,
+          296
+        ]
+      },
+      {
+        "id": "enemy_soldier",
+        "file": "sprites/enemies/enemy_soldier.png",
+        "source_box": [
+          346,
+          29,
+          656,
+          349
+        ],
+        "size": [
+          282,
+          292
+        ]
+      },
+      {
+        "id": "enemy_shieldbearer",
+        "file": "sprites/enemies/enemy_shieldbearer.png",
+        "source_box": [
+          673,
+          36,
+          933,
+          347
+        ],
+        "size": [
+          232,
+          297
+        ]
+      },
+      {
+        "id": "enemy_hammer_brute",
+        "file": "sprites/enemies/enemy_hammer_brute.png",
+        "source_box": [
+          44,
+          85,
+          331,
+          347
+        ],
+        "size": [
+          259,
+          234
+        ]
+      },
+      {
+        "id": "enemy_bomb_carrier",
+        "file": "sprites/enemies/enemy_bomb_carrier.png",
+        "source_box": [
+          700,
+          326,
+          981,
+          707
+        ],
+        "size": [
+          254,
+          369
+        ]
+      },
+      {
+        "id": "enemy_healer",
+        "file": "sprites/enemies/enemy_healer.png",
+        "source_box": [
+          1034,
+          349,
+          1317,
+          680
+        ],
+        "size": [
+          255,
+          303
+        ]
+      },
+      {
+        "id": "enemy_banner_carrier",
+        "file": "sprites/enemies/enemy_banner_carrier.png",
+        "source_box": [
+          310,
+          352,
+          628,
+          667
+        ],
+        "size": [
+          290,
+          287
+        ]
+      },
+      {
+        "id": "enemy_heavy_knight",
+        "file": "sprites/enemies/enemy_heavy_knight.png",
+        "source_box": [
+          74,
+          360,
+          297,
+          670
+        ],
+        "size": [
+          195,
+          283
+        ]
+      },
+      {
+        "id": "enemy_wall_climber",
+        "file": "sprites/enemies/enemy_wall_climber.png",
+        "source_box": [
+          283,
+          663,
+          656,
+          1025
+        ],
+        "size": [
+          345,
+          334
+        ]
+      },
+      {
+        "id": "enemy_siege_captain",
+        "file": "sprites/enemies/enemy_siege_captain.png",
+        "source_box": [
+          644,
+          693,
+          983,
+          1020
+        ],
+        "size": [
+          325,
+          299
+        ]
+      },
+      {
+        "id": "enemy_bomb_cart",
+        "file": "sprites/enemies/enemy_bomb_cart.png",
+        "source_box": [
+          29,
+          694,
+          280,
+          1026
+        ],
+        "size": [
+          223,
+          304
+        ]
+      },
+      {
+        "id": "enemy_twin_ram",
+        "file": "sprites/enemies/enemy_twin_ram.png",
+        "source_box": [
+          950,
+          708,
+          1338,
+          1013
+        ],
+        "size": [
+          374,
+          277
+        ]
+      }
+    ]
+  },
+  "integration_notes": {
+    "enemy_facing": "All enemies in this pack are oriented to face LEFT toward the castle.",
+    "world_anchor": "Use bottom-center anchoring for all world sprites.",
+    "upgrade_placement": "Do not simply overlay full upgrade sprites on top of the castle. Scale them to the recommended display heights and snap them to wall sockets or nearby ground pads.",
+    "background_fit": "Fill the game canvas width with the background; do not add flat parallax bands behind it. If needed, extend sky color from the top edge only."
+  },
+  "recommended_runtime_settings": {
+    "enemy_runner": {
+      "anchor": "bottom-center",
+      "recommended_display_height": 95,
+      "lane_role": "small-fast"
+    },
+    "enemy_soldier": {
+      "anchor": "bottom-center",
+      "recommended_display_height": 112,
+      "lane_role": "basic-medium"
+    },
+    "enemy_shieldbearer": {
+      "anchor": "bottom-center",
+      "recommended_display_height": 124,
+      "lane_role": "medium-tank"
+    },
+    "enemy_hammer_brute": {
+      "anchor": "bottom-center",
+      "recommended_display_height": 150,
+      "lane_role": "large-heavy"
+    },
+    "enemy_bomb_carrier": {
+      "anchor": "bottom-center",
+      "recommended_display_height": 122,
+      "lane_role": "medium-special"
+    },
+    "enemy_healer": {
+      "anchor": "bottom-center",
+      "recommended_display_height": 126,
+      "lane_role": "support"
+    },
+    "enemy_banner_carrier": {
+      "anchor": "bottom-center",
+      "recommended_display_height": 145,
+      "lane_role": "support-flag"
+    },
+    "enemy_heavy_knight": {
+      "anchor": "bottom-center",
+      "recommended_display_height": 156,
+      "lane_role": "elite-heavy"
+    },
+    "enemy_wall_climber": {
+      "anchor": "bottom-center",
+      "recommended_display_height": 126,
+      "lane_role": "special-climber"
+    },
+    "enemy_siege_captain": {
+      "anchor": "bottom-center",
+      "recommended_display_height": 164,
+      "lane_role": "mini-boss"
+    },
+    "enemy_bomb_cart": {
+      "anchor": "bottom-center",
+      "recommended_display_height": 148,
+      "lane_role": "siege-unit"
+    },
+    "enemy_twin_ram": {
+      "anchor": "bottom-center",
+      "recommended_display_height": 154,
+      "lane_role": "siege-unit"
+    },
+    "upgrade_archer_platform": {
+      "anchor": "bottom-center",
+      "recommended_display_height": 120,
+      "placement": "wall_attach"
+    },
+    "upgrade_crystal_tower": {
+      "anchor": "bottom-center",
+      "recommended_display_height": 150,
+      "placement": "castle_attach"
+    },
+    "upgrade_mason_workshop": {
+      "anchor": "bottom-center",
+      "recommended_display_height": 138,
+      "placement": "ground_adjacent"
+    },
+    "upgrade_bomb_workshop": {
+      "anchor": "bottom-center",
+      "recommended_display_height": 140,
+      "placement": "ground_adjacent"
+    },
+    "upgrade_fortified_wall": {
+      "anchor": "bottom-center",
+      "recommended_display_height": 170,
+      "placement": "wall_replace_or_attach"
+    },
+    "upgrade_panic_bell_tower": {
+      "anchor": "bottom-center",
+      "recommended_display_height": 165,
+      "placement": "wall_attach"
+    },
+    "upgrade_shield_generator": {
+      "anchor": "bottom-center",
+      "recommended_display_height": 145,
+      "placement": "wall_attach"
+    },
+    "upgrade_gold_vault": {
+      "anchor": "bottom-center",
+      "recommended_display_height": 138,
+      "placement": "ground_adjacent"
+    }
+  }
+}

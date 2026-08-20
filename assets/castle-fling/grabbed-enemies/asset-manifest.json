@@ -1,0 +1,244 @@
+{
+  "pack": "castle-fling-scared-enemy-grabbed-pack",
+  "version": "1.1",
+  "description": "Grabbed/scared enemy replacement sprites for Castle Fling. Humanoid enemies show scared faces; siege units use neutral grabbed/chaotic versions without facial expressions.",
+  "install_root": "assets/castle-fling/grabbed-enemies/",
+  "assets": [
+    {
+      "id": "enemy_runner_scared",
+      "base_enemy_id": "enemy_runner",
+      "file": "sprites/enemies_grabbed/enemy_runner_scared.png",
+      "size": [
+        282,
+        309
+      ],
+      "anchor": "bottom-center",
+      "recommended_display_height": 95,
+      "state": "grabbed_scared",
+      "source_box": [
+        44,
+        14,
+        366,
+        363
+      ]
+    },
+    {
+      "id": "enemy_soldier_scared",
+      "base_enemy_id": "enemy_soldier",
+      "file": "sprites/enemies_grabbed/enemy_soldier_scared.png",
+      "size": [
+        289,
+        309
+      ],
+      "anchor": "bottom-center",
+      "recommended_display_height": 112,
+      "state": "grabbed_scared",
+      "source_box": [
+        396,
+        13,
+        725,
+        362
+      ]
+    },
+    {
+      "id": "enemy_shieldbearer_scared",
+      "base_enemy_id": "enemy_shieldbearer",
+      "file": "sprites/enemies_grabbed/enemy_shieldbearer_scared.png",
+      "size": [
+        315,
+        299
+      ],
+      "anchor": "bottom-center",
+      "recommended_display_height": 124,
+      "state": "grabbed_scared",
+      "source_box": [
+        723,
+        9,
+        1078,
+        347
+      ]
+    },
+    {
+      "id": "enemy_hammer_brute_scared",
+      "base_enemy_id": "enemy_hammer_brute",
+      "file": "sprites/enemies_grabbed/enemy_hammer_brute_scared.png",
+      "size": [
+        368,
+        310
+      ],
+      "anchor": "bottom-center",
+      "recommended_display_height": 150,
+      "state": "grabbed_scared",
+      "source_box": [
+        1051,
+        17,
+        1449,
+        367
+      ]
+    },
+    {
+      "id": "enemy_bomb_carrier_scared",
+      "base_enemy_id": "enemy_bomb_carrier",
+      "file": "sprites/enemies_grabbed/enemy_bomb_carrier_scared.png",
+      "size": [
+        270,
+        322
+      ],
+      "anchor": "bottom-center",
+      "recommended_display_height": 122,
+      "state": "grabbed_scared",
+      "source_box": [
+        22,
+        349,
+        331,
+        711
+      ]
+    },
+    {
+      "id": "enemy_healer_scared",
+      "base_enemy_id": "enemy_healer",
+      "file": "sprites/enemies_grabbed/enemy_healer_scared.png",
+      "size": [
+        318,
+        317
+      ],
+      "anchor": "bottom-center",
+      "recommended_display_height": 126,
+      "state": "grabbed_scared",
+      "source_box": [
+        356,
+        352,
+        714,
+        709
+      ]
+    },
+    {
+      "id": "enemy_banner_carrier_scared",
+      "base_enemy_id": "enemy_banner_carrier",
+      "file": "sprites/enemies_grabbed/enemy_banner_carrier_scared.png",
+      "size": [
+        316,
+        330
+      ],
+      "anchor": "bottom-center",
+      "recommended_display_height": 145,
+      "state": "grabbed_scared",
+      "source_box": [
+        710,
+        342,
+        1066,
+        711
+      ]
+    },
+    {
+      "id": "enemy_heavy_knight_scared",
+      "base_enemy_id": "enemy_heavy_knight",
+      "file": "sprites/enemies_grabbed/enemy_heavy_knight_scared.png",
+      "size": [
+        294,
+        315
+      ],
+      "anchor": "bottom-center",
+      "recommended_display_height": 156,
+      "state": "grabbed_scared",
+      "source_box": [
+        1095,
+        358,
+        1429,
+        713
+      ]
+    },
+    {
+      "id": "enemy_wall_climber_scared",
+      "base_enemy_id": "enemy_wall_climber",
+      "file": "sprites/enemies_grabbed/enemy_wall_climber_scared.png",
+      "size": [
+        266,
+        345
+      ],
+      "anchor": "bottom-center",
+      "recommended_display_height": 126,
+      "state": "grabbed_scared",
+      "source_box": [
+        32,
+        687,
+        338,
+        1070
+      ]
+    },
+    {
+      "id": "enemy_siege_captain_scared",
+      "base_enemy_id": "enemy_siege_captain",
+      "file": "sprites/enemies_grabbed/enemy_siege_captain_scared.png",
+      "size": [
+        329,
+        310
+      ],
+      "anchor": "bottom-center",
+      "recommended_display_height": 164,
+      "state": "grabbed_scared",
+      "source_box": [
+        349,
+        703,
+        718,
+        1052
+      ]
+    },
+    {
+      "id": "enemy_bomb_cart_grabbed",
+      "base_enemy_id": "enemy_bomb_cart",
+      "file": "sprites/enemies_grabbed/enemy_bomb_cart_grabbed.png",
+      "size": [
+        290,
+        264
+      ],
+      "anchor": "bottom-center",
+      "recommended_display_height": 148,
+      "state": "grabbed_neutral_siege",
+      "source_box": [
+        714,
+        752,
+        1044,
+        1055
+      ]
+    },
+    {
+      "id": "enemy_twin_ram_grabbed",
+      "base_enemy_id": "enemy_twin_ram",
+      "file": "sprites/enemies_grabbed/enemy_twin_ram_grabbed.png",
+      "size": [
+        375,
+        287
+      ],
+      "anchor": "bottom-center",
+      "recommended_display_height": 154,
+      "state": "grabbed_neutral_siege",
+      "source_box": [
+        1053,
+        721,
+        1449,
+        1048
+      ]
+    }
+  ],
+  "mappings": {
+    "enemy_runner": "enemy_runner_scared",
+    "enemy_soldier": "enemy_soldier_scared",
+    "enemy_shieldbearer": "enemy_shieldbearer_scared",
+    "enemy_hammer_brute": "enemy_hammer_brute_scared",
+    "enemy_bomb_carrier": "enemy_bomb_carrier_scared",
+    "enemy_healer": "enemy_healer_scared",
+    "enemy_banner_carrier": "enemy_banner_carrier_scared",
+    "enemy_heavy_knight": "enemy_heavy_knight_scared",
+    "enemy_wall_climber": "enemy_wall_climber_scared",
+    "enemy_siege_captain": "enemy_siege_captain_scared",
+    "enemy_bomb_cart": "enemy_bomb_cart_grabbed",
+    "enemy_twin_ram": "enemy_twin_ram_grabbed"
+  },
+  "usage_notes": {
+    "state": "Use these sprites only while an enemy is actively grabbed/held by the player hand. Revert to the normal enemy sprite when released/thrown unless the game keeps a thrown state.",
+    "anchor": "Use the same bottom-center anchor and scale logic as each matching normal enemy sprite.",
+    "siege_units": "enemy_bomb_cart_grabbed and enemy_twin_ram_grabbed are not scared faces because they are siege weapons. They should be used as neutral grabbed-state variants.",
+    "do_not_use": "Do not use the older sheet with giant fingers grabbing enemies."
+  }
+}

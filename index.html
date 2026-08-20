@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="application-name" content="Castle Fling">
+<meta name="apple-mobile-web-app-title" content="Castle Fling">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#151a24">
+<title>Castle Fling</title>
+<link rel="manifest" href="site.webmanifest">
+<link rel="icon" href="assets/build-branding/icons/app_icon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="192x192" href="assets/build-branding/icons/app_icon_192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="assets/build-branding/icons/app_icon_180.png">
+<link rel="stylesheet" href="style.css">
+<script>
+/* ---- native -> web window-inset bridge (Android edge-to-edge) ----
+   MainActivity's WindowInsetsCompat listener calls this with CSS pixels for the
+   system bars and the display cutout. It is deliberately ONE-WAY: nothing is
+   exposed back to native here, so this adds no JavaScript attack surface (the
+   only @JavascriptInterface in the app remains the diagnostics logger).
+
+   It lives inline in <head>, ahead of game.js, because the first inset dispatch
+   can land before the game has finished booting — writing straight to the root
+   element means CSS picks the values up whether or not game.js exists yet, and
+   __castleFlingOnInsets is called only if the game has already registered it. */
+window.__castleFlingSetInsets = function (top, right, bottom, left) {
+  var s = document.documentElement.style;
+  s.setProperty('--android-safe-top', (Number(top) || 0) + 'px');
+  s.setProperty('--android-safe-right', (Number(right) || 0) + 'px');
+  s.setProperty('--android-safe-bottom', (Number(bottom) || 0) + 'px');
+  s.setProperty('--android-safe-left', (Number(left) || 0) + 'px');
+  if (typeof window.__castleFlingOnInsets === 'function') window.__castleFlingOnInsets();
+};
+</script>
+</head>
+<body>
+<div id="gameContainer">
+  <canvas id="game" width="1280" height="720"></canvas>
+
+  <!-- ============ IN-GAME HUD ============ -->
+  <div id="hud" class="hidden">
+    <div id="hudTopLeft">
+      <div id="castleBarWrap" title="Castle Health">
+        <div id="castleBar">
+          <div id="castleBarTrack"><div id="castleBarFill"></div></div>
+          <span id="castleBarText"></span>
+        </div>
+        <div id="armorBadge" class="hidden">🛡<span id="armorText"></span></div>
+      </div>
+      <button id="levelBarWrap" title="Player level — tap for rewards" aria-label="Level rewards">
+        <span class="levelBadge"><span id="hudLevelNum">1</span></span>
+        <span id="hudLevelBar" class="levelBar">
+          <span class="levelBarFill" id="hudLevelFill"></span>
+          <span class="levelBarText" id="hudLevelText"></span>
+        </span>
+      </button>
+    </div>
+    <div id="hudTopCenter">
+      <div id="waveLabel">Wave 1</div>
+      <div id="enemiesLeft"></div>
+      <div id="comboLabel" class="hidden"></div>
+    </div>
+    <div id="hudTopRight">
+      <div class="resource" id="crownWrap" title="Your crowns (updates live)"><img class="resIcon" src="assets/castle-fling/ui-trimmed/icon_crown_gold.png" alt="Crowns"><span id="crownText">0</span></div>
+      <div class="resource" id="goldWrap"><img class="resIcon" src="assets/castle_ricochet/ui/ui_currency_coin_castle.png" alt="Coins"><span id="goldText">0</span></div>
+      <div class="resource"><img class="resIcon" src="assets/ui/rewards/reward_star_gold_64.png" alt="Stars"><span id="scoreText">0</span></div>
+      <button id="pauseBtn" class="iconBtn imgBtn" aria-label="Pause"><img src="assets/ui/theme/ui_pause_icon.png" alt="Pause" draggable="false"></button>
+    </div>
+    <div id="abilityBar"></div>
+  </div>
+
+  <!-- ============ MAIN MENU ============ -->
+  <div id="menuScreen" class="screen">
+    <div class="menuPanel">
+      <img id="logoImg" src="assets/castle-fling/branding/logo_castle_fling.png" alt="Castle Fling" draggable="false">
+      <!-- menu actions: four large primary buttons over one compact icon row.
+           DOM order IS the focus order (Play → Continue → Shop → Upgrades →
+           Board → Milestones → Ricochet → How to Play → Settings). -->
+      <div class="menuActions">
+        <div class="menuButtons" id="menuPrimary">
+          <button id="btnPlay" class="bigBtn gold"><img class="btnIco" src="assets/ui/theme/ui_play_icon.png" alt="">Play</button>
+          <button id="btnContinueRun" class="bigBtn gold hidden"><img class="btnIco" src="assets/ui/theme/ui_play_icon.png" alt="">Continue Run <span id="continueWave" class="crownTag"></span></button>
+          <button id="btnShop" class="bigBtn"><img class="btnIco" src="assets/castle-fling/ui-trimmed/icon_crown_gold.png" alt="">Crown Shop</button>
+          <button id="btnMeta" class="bigBtn"><img class="btnIco" src="assets/ui/main_menu/main_menu_icon_upgrades.png" alt="">Upgrades <span id="menuCrowns" class="crownTag"></span></button>
+        </div>
+        <div class="menuIconRow" id="menuSecondary">
+          <button id="btnDaily" class="menuIcoBtn menuIcoBtn--board" aria-label="Open Adventurers&rsquo; Board" data-tip="Adventurers&rsquo; Board">
+            <span class="menuIcoBtn__visual"><img src="assets/ui/theme/ui_adventurers_board_icon.png" alt="" draggable="false" decoding="async"></span>
+            <span id="menuDailyBadge" class="menuIcoBtn__badge"></span>
+          </button>
+          <button id="btnMilestones" class="menuIcoBtn menuIcoBtn--milestones" aria-label="Open Milestones" data-tip="Milestones">
+            <span class="menuIcoBtn__visual"><img id="btnMilestonesIco" alt="" draggable="false" decoding="async"></span>
+            <span id="menuMilestoneBadge" class="menuIcoBtn__badge"></span>
+          </button>
+          <button id="btnRicochet" class="menuIcoBtn menuIcoBtn--rico" aria-label="Play Castle Ricochet" data-tip="Castle Ricochet — bank your Royal Striker off castle obstacles and knock enemy tokens into the pits. Up to 1,500 Coins!">
+            <span class="menuIcoBtn__visual"><img src="assets/castle_ricochet/ui/ui_logo_castle_ricochet.png" alt="" draggable="false" decoding="async"></span>
+            <span id="ricochetStatus" class="menuIcoBtn__timer"></span>
+          </button>
+          <button id="btnHowTo" class="menuIcoBtn menuIcoBtn--howto" aria-label="Open How to Play" data-tip="How to Play">
+            <span class="menuIcoBtn__visual"><img src="assets/ui/theme/ui_how_to_icon.png" alt="" draggable="false" decoding="async"></span>
+          </button>
+          <button id="btnSettings" class="menuIcoBtn menuIcoBtn--settings" aria-label="Open Settings" data-tip="Settings">
+            <span class="menuIcoBtn__visual"><img src="assets/ui/theme/ui_settings_icon.png" alt="" draggable="false" decoding="async"></span>
+          </button>
+        </div>
+      </div>
+      <div id="playerLevelWrap" title="Player level — tap for rewards">
+        <span class="levelBadge big"><span id="menuLevelNum">1</span></span>
+        <span class="levelBarOuter">
+          <span id="menuLevelBar" class="levelBar">
+            <span class="levelBarFill" id="menuLevelFill"></span>
+            <span class="levelBarText" id="menuLevelText"></span>
+          </span>
+        </span>
+      </div>
+      <div id="menuBest"></div>
+      <div class="legalFootnote"><a href="#" id="menuLegalLink">Terms &amp; Privacy</a></div>
+    </div>
+  </div>
+
+  <!-- ============ CASTLE SELECT ============ -->
+  <div id="castleScreen" class="screen hidden">
+    <div class="panel wide">
+      <h2>Choose Your Castle</h2>
+      <div id="castleList" class="cardRow"></div>
+      <div id="nightmareRow" class="hidden">
+        <label class="toggleRow"><input type="checkbox" id="nightmareToggle"> <img class="sigilIco" src="assets/castle-fling/royal-treasury/sprites/treasury/treasury_nightmare_sigil.png" alt="" draggable="false"> <span>Nightmare Sigil — enemies +40% HP &amp; speed, crowns ×2</span></label>
+      </div>
+      <button id="btnCastleBack" class="bigBtn small">← Back</button>
+    </div>
+  </div>
+
+  <!-- ============ META / PERMANENT UPGRADES ============ -->
+  <div id="metaScreen" class="screen hidden">
+    <div class="panel wide tall">
+      <h2>Royal Treasury <span id="metaCrowns" class="crownTag"></span></h2>
+      <div id="metaList"></div>
+      <button id="btnMetaBack" class="bigBtn small">← Back</button>
+    </div>
+  </div>
+
+  <!-- ============ HOW TO PLAY ============ -->
+  <div id="howtoScreen" class="screen hidden">
+    <div class="panel wide tall">
+      <h2><img class="hIco" src="assets/ui/theme/ui_how_to_icon.png" alt="" draggable="false"> How to Play</h2>
+      <!-- The guide body is built by buildHowtoLines() in game.js every time
+           this screen opens, so its reward numbers are read from the live
+           configuration that grants them. Nothing is authored here: a second
+           static copy could only ever drift out of date. -->
+      <div class="howtoBody"></div>
+      <!-- ============ TUTORIALS ============
+           Authored here, but openHowTo() MOVES this block to the end of
+           .howtoBody so it sits at the bottom of the scroller — it cannot be
+           written inside .howtoBody directly because that element's innerHTML
+           is rebuilt from buildHowtoLines() on every open. One grid, equal
+           tracks, stretched row — all buttons always share width, height,
+           font and press states. -->
+      <div class="tutorialGroup">
+        <h3 class="sectionHead">Tutorials</h3>
+        <div class="tutorialBtnRow">
+          <button id="btnTutorialFling" class="bigBtn small" aria-label="Play the Castle Fling tutorial">
+            <span class="tutIcoSlot"><img src="assets/castle-fling/branding/logo_castle_fling.png" alt="" draggable="false" decoding="async"></span>
+            <span class="btnLabel">Castle Fling Tutorial</span>
+          </button>
+          <button id="btnTutorialRicochet" class="bigBtn small" aria-label="Play the Castle Ricochet tutorial on your next attempt">
+            <span class="tutIcoSlot"><img src="assets/castle_ricochet/ui/ui_logo_castle_ricochet.png" alt="" draggable="false" decoding="async"></span>
+            <span class="btnLabel">Castle Ricochet Tutorial</span>
+          </button>
+          <button id="btnTutorialBoard" class="bigBtn small" aria-label="Play the Adventurers&rsquo; Board tutorial">
+            <span class="tutIcoSlot"><img src="assets/ui/theme/ui_adventurers_board_icon.png" alt="" draggable="false" decoding="async"></span>
+            <span class="btnLabel">Adventurers&rsquo; Board Tutorial</span>
+          </button>
+        </div>
+      </div>
+      <button id="btnHowToBack" class="bigBtn small">← Back</button>
+    </div>
+  </div>
+
+  <!-- ============ CROWN SHOP ============ -->
+  <div id="shopScreen" class="screen hidden">
+    <div class="panel wide">
+      <h2><img class="hIco" src="assets/castle-fling/ui-trimmed/icon_crown_gold.png" alt=""> Crown Shop</h2>
+      <div id="shopBanner">✨ Ad-free with any purchase ✨</div>
+      <div id="shopAdNote" class="subtext">Removes automatic ads between waves. Rewarded ads for extra passive choices still apply.</div>
+      <div id="shopStatus" class="subtext"></div>
+      <div id="shopList"></div>
+      <div class="rowBtns">
+        <button id="btnRestorePurchases" class="bigBtn small">↩ Restore Purchases</button>
+        <button id="btnShopBack" class="bigBtn small">← Back</button>
+      </div>
+      <div class="legalFootnote">Payments are handled by your app store. <a href="#" id="shopLegalLink">Terms &amp; Privacy</a></div>
+    </div>
+  </div>
+
+  <!-- ============ TERMS & PRIVACY ============ -->
+  <div id="legalScreen" class="screen hidden">
+    <div class="panel wide tall buildPanel">
+      <div class="panelHeader"><h2>📜 Terms &amp; Privacy</h2></div>
+      <div class="panelBody" id="legalBody"></div>
+      <div class="panelFooter actionFooter">
+        <button id="btnLegalBack" class="bigBtn small">← Back</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ LEVEL REWARDS ============ -->
+  <div id="levelRewardsScreen" class="screen hidden dim">
+    <div class="panel tall">
+      <h2><img class="hIco" src="assets/ui/rewards/reward_star_gold_128.png" alt=""> Level Rewards</h2>
+      <p class="subtext">Earn stars in battle to level up. Coin bonuses arrive automatically every 5 levels.</p>
+      <div id="levelRewardsList"></div>
+      <button id="btnLevelRewardsBack" class="bigBtn small">← Back</button>
+    </div>
+  </div>
+
+  <!-- ============ MILESTONES ============ -->
+  <div id="milestoneScreen" class="screen hidden">
+    <div class="panel tall">
+      <h2><img id="milestoneHeadIco" class="headIco" alt="" draggable="false"> Milestones</h2>
+      <div id="milestoneList"></div>
+      <button id="btnMilestonesBack" class="bigBtn small">← Back</button>
+    </div>
+  </div>
+
+  <!-- ============ SETTINGS ============ -->
+  <div id="settingsScreen" class="screen hidden">
+    <div class="panel">
+      <h2 id="settingsTitle">Settings</h2>
+      <div class="settingsGrid">
+        <label class="toggleRow"><input type="checkbox" id="setSound"> <img class="rowIco" src="assets/castle-fling/ui-polish/trimmed/settings_icon_sound_effects.png" alt=""> <span>Sound Effects</span></label>
+        <label class="toggleRow"><input type="checkbox" id="setMusic"> <img class="rowIco" src="assets/castle-fling/ui-polish/trimmed/settings_icon_music.png" alt=""> <span>Music</span></label>
+        <label class="toggleRow sliderRow"><img class="rowIco" src="assets/castle-fling/ui-polish/trimmed/settings_slider_music_volume.png" alt=""> <span>Music Volume</span> <input type="range" id="setMusicVol" min="0" max="1" step="0.05"></label>
+        <label class="toggleRow"><input type="checkbox" id="setNumbers"> <img class="rowIco" src="assets/castle-fling/ui-polish/trimmed/settings_icon_damage_numbers.png" alt=""> <span>Damage Numbers</span></label>
+        <label class="toggleRow"><input type="checkbox" id="setParticles"> <img class="rowIco" src="assets/castle-fling/ui-polish/trimmed/settings_icon_extra_particles.png" alt=""> <span>Extra Particles</span></label>
+      </div>
+      <!-- Settings holds settings only. Both tutorials live in How to Play. -->
+      <div class="settingsBtnRow">
+        <button id="btnSettingsLegal" class="bigBtn small">📜 Terms &amp; Privacy</button>
+        <!-- Ad-consent entry point. Stays hidden unless the UMP SDK reports that
+             a privacy-options entry point is REQUIRED for this user's region and
+             consent state (see refreshPrivacyOptionsButton in game.js). -->
+        <button id="btnPrivacyOptions" class="bigBtn small hidden">🛡️ Privacy Options</button>
+        <button id="btnResetSave" class="bigBtn small danger">Reset All Progress</button>
+        <!-- closed-test tool: hidden until the Settings title is tapped 5× -->
+        <button id="btnCopyDiag" class="bigBtn small hidden">🩺 Copy Diagnostic Report</button>
+        <button id="btnSettingsBack" class="bigBtn small">← Back</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ UPGRADE CARD CHOICE ============ -->
+  <div id="cardScreen" class="screen hidden dim">
+    <div class="panel wide noBg">
+      <h2 class="glowTitle">Wave <span id="cardWaveNum"></span> Cleared!</h2>
+      <p id="cardBonusText" class="subtext"></p>
+      <p id="freeUpgradeCounter" class="subtext counterText"></p>
+      <h3 id="cardChooseTitle">Choose an upgrade</h3>
+      <div id="cardRow" class="cardRow"></div>
+      <div id="noUpgradePanel" class="hidden">
+        <p id="noUpgradeMsg" class="noUpgradeMsg">Free upgrades used for this run. Watch an ad for 1 more choice.</p>
+        <div class="rowBtns">
+          <button id="btnWatchAdUpgrade" class="bigBtn gold">Watch Ad</button>
+          <button id="btnNoUpgradeContinue" class="bigBtn">Continue →</button>
+        </div>
+      </div>
+      <button id="btnSkipCard" class="bigBtn small ghost">Skip (+7 <img class="curIco" src="assets/castle_ricochet/ui/ui_currency_coin_castle.png" alt="coins">)</button>
+    </div>
+  </div>
+
+  <!-- ============ BUILD / ROOMS ============ -->
+  <div id="buildScreen" class="screen hidden dim">
+    <div class="panel wide tall buildPanel">
+      <div class="panelHeader">
+        <h2>Castle Rooms <span class="resource inline"><img class="resIcon" src="assets/castle_ricochet/ui/ui_currency_coin_castle.png" alt="Coins"><span id="buildGold">0</span></span></h2>
+      </div>
+      <div class="panelBody buildPanelBody">
+        <div id="roomList"></div>
+        <div id="defenderPanel">
+          <h3>🧍 Recruits: <span id="defTotal">0</span></h3>
+          <div id="defAssign"></div>
+        </div>
+      </div>
+      <div class="panelFooter actionFooter">
+        <button id="btnAbandonRun" class="bigBtn danger small">Abandon Run</button>
+        <button id="btnSaveRun" class="bigBtn small">💾 Save Run — 20 <img class="curIco" src="assets/castle-fling/ui-trimmed/icon_crown_gold.png" alt="crowns"></button>
+        <button id="btnNextWave" class="bigBtn gold">⚔ Next Wave →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ MODIFIER OFFER ============ -->
+  <div id="modScreen" class="screen hidden dim">
+    <div class="panel">
+      <h2><img class="hIco" src="assets/castle-fling/ui-polish/trimmed/bargain_warning.png" alt="⚠" draggable="false"> A Dangerous Bargain</h2>
+      <div id="modCard" class="modCard"></div>
+      <div class="rowBtns">
+        <button id="btnModAccept" class="bigBtn danger">Accept</button>
+        <button id="btnModDecline" class="bigBtn">Decline</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ PAUSE ============ -->
+  <div id="pauseScreen" class="screen hidden dim">
+    <div class="panel">
+      <h2>Paused</h2>
+      <div id="pauseUpgrades" class="subtext"></div>
+      <div class="pauseBtns">
+        <button id="btnResume" class="bigBtn gold span2"><img class="btnIco" src="assets/ui/theme/ui_play_icon.png" alt="">Resume</button>
+        <button id="btnPauseShop" class="bigBtn"><img class="btnIco" src="assets/castle-fling/ui-trimmed/icon_crown_gold.png" alt="">Crown Shop</button>
+        <button id="btnPauseSettings" class="bigBtn"><img class="btnIco" src="assets/ui/theme/ui_settings_icon.png" alt="">Settings</button>
+        <button id="btnPauseRestart" class="bigBtn"><img class="btnIco" src="assets/ui/theme/ui_restart_icon.png" alt="">Restart Run</button>
+        <button id="btnPauseQuit" class="bigBtn"><img class="btnIco" src="assets/ui/theme/ui_home_icon.png" alt="">Abandon Run</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ GAME OVER ============ -->
+  <div id="gameoverScreen" class="screen hidden dim">
+    <div class="panel">
+      <img id="goBanner" src="assets/castle_ricochet/ui/ui_banner_game_over.png" alt="Game Over" draggable="false">
+      <div class="doomTitle goSub">The Castle Has Fallen</div>
+      <div id="goStats"></div>
+      <div id="goCrowns" class="crownAward"></div>
+      <button id="btnRetry" class="bigBtn gold"><img class="btnIco" src="assets/ui/theme/ui_restart_icon.png" alt="">Try Again</button>
+      <button id="btnGoMenu" class="bigBtn"><img class="btnIco" src="assets/ui/theme/ui_home_icon.png" alt="">Main Menu</button>
+    </div>
+  </div>
+
+  <!-- ============ CASTLE RICOCHET PAUSE ============ -->
+  <div id="ricochetPauseScreen" class="screen hidden dim">
+    <div class="panel">
+      <h2>Castle Ricochet — Paused</h2>
+      <p class="subtext">Five shots. Three enemies. Avoid the pits.</p>
+      <div class="pauseBtns">
+        <button id="btnRicoResume" class="bigBtn gold span2"><img class="btnIco" src="assets/ui/theme/ui_play_icon.png" alt="">Resume</button>
+        <button id="btnRicoHowTo" class="bigBtn"><img class="btnIco" src="assets/ui/theme/ui_how_to_icon.png" alt="">How to Play</button>
+        <button id="btnRicoSettings" class="bigBtn"><img class="btnIco" src="assets/ui/theme/ui_settings_icon.png" alt="">Settings</button>
+        <button id="btnRicoAbandon" class="bigBtn danger span2">Abandon Attempt</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ CASTLE RICOCHET RESULT ============ -->
+  <div id="ricochetResultScreen" class="screen hidden dim">
+    <div class="panel ricoResultPanel">
+      <img id="ricoResultBanner" class="ricoBanner" src="assets/castle_ricochet/ui/ui_logo_castle_ricochet.png" alt="">
+      <h2 id="ricoResultTitle"></h2>
+      <div id="ricoResultReason" class="subtext hidden"></div>
+      <img id="ricoResultBadge" class="ricoBadge hidden" src="assets/castle_ricochet/ui/ui_reward_badge_500.png" alt="">
+      <div id="ricoResultCoins" class="ricoCoins"></div>
+      <div id="ricoResultShots" class="subtext"></div>
+      <div id="ricoResultNext" class="subtext"></div>
+      <div class="rowBtns">
+        <button id="btnRicoPlayAgain" class="bigBtn gold">PLAY AGAIN — 20 CROWNS</button>
+        <button id="btnRicoHome" class="bigBtn"><img class="btnIco" src="assets/ui/theme/ui_home_icon.png" alt="">RETURN HOME</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ ADVENTURERS' BOARD (Royal Decrees · Daily Siege) ============ -->
+  <div id="dailyScreen" class="screen hidden">
+    <div class="panel wide tall boardPanel">
+      <div class="panelHeader boardHeader">
+        <div class="boardTitleRow">
+          <h2><img class="hIco" src="assets/ui/theme/ui_tutorial_warning_crest.png?tv=6" alt="" draggable="false"> Adventurers&rsquo; Board</h2>
+          <div class="boardMeta">
+            <span class="resource inline sealPill" title="Royal Seals — spend them in Kingdom Restoration"><img class="resIcon" src="assets/kingdom-restoration/system-icons/icon_royal_seal.png?kv=1" alt="Royal Seals"><span id="boardSeals">0</span></span>
+            <span id="boardReset" class="boardReset">Daily Reset in --:--:--</span>
+          </div>
+        </div>
+        <div class="boardTabs">
+          <button id="tabDecrees" class="bigBtn small tabBtn"><span class="tabIcoSlot"><img class="tabIco" src="assets/kingdom-restoration/story-events/icon_story_event_scroll.png?kv=1" alt="" draggable="false"></span><span class="tabLabel">Royal Decrees</span> <span id="tabDecreeBadge" class="crownTag"></span></button>
+          <button id="tabSiege" class="bigBtn small tabBtn"><span class="tabIcoSlot"><img class="tabIco" src="assets/castle-fling/ui-trimmed/icon_shield.png" alt="" draggable="false"></span><span class="tabLabel">Daily Siege</span> <span id="tabSiegeBadge" class="crownTag"></span></button>
+        </div>
+      </div>
+      <div class="panelBody boardBody">
+        <div id="decreePane">
+          <div id="decreeCards" class="decreeRow"></div>
+          <div id="decreeBonusRow"></div>
+        </div>
+        <div id="siegePane" class="hidden"></div>
+      </div>
+      <div class="panelFooter actionFooter boardFooter">
+        <div id="kingdomStrip" role="button" tabindex="0" title="Kingdom Restoration — tap to choose a project"></div>
+        <button id="btnDailyBack" class="bigBtn small">← Back</button>
+      </div>
+    </div>
+    <div id="kingdomOverlay" class="hidden">
+      <div class="panel wide tall" id="kingdomPanel"></div>
+      <div id="krNotice" class="hidden" role="dialog" aria-modal="true" aria-label="Kingdom Restoration progress">
+        <div class="panel krNoticePanel">
+          <div class="krNoticeHead">
+            <img class="krNoticeCrest" src="assets/kingdom-restoration/system-icons/icon_prosperity_star.png?kv=1" alt="" draggable="false">
+            <h3>The Kingdom Rises</h3>
+          </div>
+          <div id="krNoticeRows" class="krNoticeBody"></div>
+          <div class="krNoticeActions"><button id="krNoticeOk" class="bigBtn small gold">Continue</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ DAILY SIEGE RESULT ============ -->
+  <div id="siegeResultScreen" class="screen hidden dim">
+    <div class="panel siegeResultPanel">
+      <img id="siegeResultBanner" class="ricoBanner" src="assets/castle_ricochet/ui/ui_banner_victory.png" alt="">
+      <h2 id="siegeResultTitle"></h2>
+      <div id="siegeResultTier" class="siegeTierStars"></div>
+      <div id="siegeResultStats"></div>
+      <div id="siegeResultSeals" class="crownAward hidden"></div>
+      <div id="siegeResultNote" class="subtext hidden"></div>
+      <div class="rowBtns">
+        <button id="btnSiegeRetry" class="bigBtn gold">⚔ Retry Siege</button>
+        <button id="btnSiegeHome" class="bigBtn"><img class="btnIco" src="assets/ui/theme/ui_home_icon.png" alt="">Return Home</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ TUTORIAL OVERLAY (Castle Rooms guidance) ============
+       Battle steps are painted on the canvas, exactly like the Castle Ricochet
+       tutorial. The Castle Rooms screen is a DOM screen stacked above the
+       canvas, so its steps paint the SAME panel here instead: same fill and
+       gold frame, same Georgia ramp, same colours, same gold pills, same
+       dots. #tutSpot is the spotlight (its huge box-shadow is the dim), and
+       #tutArrow is a pure-CSS gold pointer — no glyphs, no emoji. Everything
+       is positioned each frame from the target's live rendered bounds. -->
+  <div id="tutOverlay" class="hidden">
+    <!-- measured viewport probe: its rect IS the safe visible game area
+         (dvh minus the safe-area insets), so the panel is clamped against
+         what the player can actually see rather than window.innerHeight -->
+    <div id="tutSafe" aria-hidden="true"></div>
+    <div id="tutSpot" class="hidden"><span class="tutSpotRing"></span></div>
+    <div id="tutArrow" class="hidden"><span class="tutArrowShaft"></span><span class="tutArrowHead"></span></div>
+    <div id="tutBox" role="dialog" aria-live="polite" aria-label="Tutorial">
+      <!-- the reading half scrolls on its own so a short landscape screen
+           shrinks the text, never the Back / Skip / Next row -->
+      <div id="tutBody">
+        <h3 id="tutTitle"></h3>
+        <p id="tutText"></p>
+        <p id="tutHint" class="hidden"></p>
+      </div>
+      <div id="tutNav">
+        <button id="tutBack" class="tutPill" type="button">&#8592; BACK</button>
+        <span id="tutDots"></span>
+        <button id="tutSkip" class="tutPill" type="button">SKIP</button>
+        <button id="tutNext" class="tutPill tutPill--gold" type="button">NEXT &#8594;</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Landscape gate. The Activity no longer locks orientation (Play flags that
+       as a large-screen restriction), so the window can genuinely be portrait or
+       a narrow split-screen sliver. Instead of rendering a crushed board this
+       covers the screen, and game.js parks any live run in the normal pause
+       state and resumes it automatically once the window is usable again.
+       Reuses the existing panel styling and the menu logo — no new artwork. -->
+  <div id="rotateGate" class="hidden" role="dialog" aria-live="polite" aria-label="Rotate your device">
+    <div class="panel">
+      <img class="rotateGateLogo" src="assets/castle-fling/branding/logo_castle_fling.png" alt="Castle Fling" draggable="false">
+      <div class="rotateGateIcon" aria-hidden="true">&#128260;</div>
+      <h3>Turn your device</h3>
+      <p>Castle Fling is played in <b>landscape</b>. Rotate your device &mdash; or make the window wider &mdash; and your siege picks up right where you left it.</p>
+      <p class="rotateGateNote">Your run is paused and saved.</p>
+    </div>
+  </div>
+
+  <!-- themed confirm dialog — replaces OS confirm() popups -->
+  <div id="confirmModal" class="hidden">
+    <div class="panel">
+      <h3 id="confirmTitle"></h3>
+      <p id="confirmMsg"></p>
+      <div class="confirmBtns">
+        <button id="confirmCancel" class="bigBtn small"></button>
+        <button id="confirmOk" class="bigBtn small gold"></button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- publisher intro: plays once on boot, tap to skip, removed after playback -->
+<div id="introSplash">
+  <video id="introVideo" src="assets/castle-fling/branding/ehg_intro.mp4" playsinline preload="auto"></video>
+  <div id="introSkip">Tap to skip</div>
+</div>
+<script src="platform.js"></script>
+<!-- Installs the Android ads/billing bridges platform.js looks for. Must sit
+     between platform.js (it reads IAP_PRODUCTS) and game.js (which resolves the
+     bridge mode when it calls Ads.init()). No-ops on web and desktop. -->
+<script src="native-bridge-android.js"></script>
+<script src="game.js"></script>
+<script src="ricochet.js"></script>
+<script src="daily.js"></script>
+<script src="tutorial.js"></script>
+</body>
+</html>

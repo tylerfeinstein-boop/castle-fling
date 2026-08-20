@@ -1,0 +1,20 @@
+{
+  "pack": "castle-fling-app-icon-pack",
+  "version": "1.0",
+  "assets": [
+    {
+      "id": "app_icon_1024",
+      "file": "icons/app_icon_1024.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "usage": "Primary app icon for desktop and mobile builds"
+    },
+    {
+      "id": "app_icon_ico",
+      "file": "icons/app_icon.ico",
+      "usage": "Windows icon for .exe packaging and desktop shortcuts"
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+# ---- Dependencies ----
+node_modules/
+
+# ---- Generated builds & packaged artifacts ----
+# See build/README.md for how to regenerate these.
+dist/
+build/*
+!build/README.md
+revert-backup/
+
+# ---- Android ----
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+# Generated mirror of the web bundle: npm run sync:android
+android/app/src/main/assets/www/
+
+# ---- Signing material: NEVER commit ----
+*.jks
+*.keystore
+key.properties
+local.properties
+
+# ---- Secrets ----
+.env
+.env.*
+!.env.example
+
+# ---- Editors / OS ----
+.claude/settings.local.json
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db
+desktop.ini

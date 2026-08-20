@@ -1,0 +1,60 @@
+{
+  "pack": "castle-fling-castle-upgrade-and-cursor-pack",
+  "version": "1.0",
+  "assets": [
+    {
+      "id": "upgrade_mage_tower_wall_attach",
+      "file": "sprites/upgrades/upgrade_mage_tower_wall_attach.png",
+      "size": [
+        725,
+        1178
+      ],
+      "type": "castle_upgrade",
+      "anchor": "bottom-center",
+      "socket": "roofLeft or wallLeft upper hardpoint",
+      "recommended_display_height": 160,
+      "notes": "Use as a wall-integrated mage tower upgrade built into the castle silhouette. Tuck it behind or directly attached to the upper-left castle wall."
+    },
+    {
+      "id": "upgrade_wall_forge_wall_attach",
+      "file": "sprites/upgrades/upgrade_wall_forge_wall_attach.png",
+      "size": [
+        931,
+        1003
+      ],
+      "type": "castle_upgrade",
+      "anchor": "bottom-center",
+      "socket": "wallRight upper hardpoint",
+      "recommended_display_height": 145,
+      "notes": "Use as a wall-integrated forge/workshop upgrade attached to the upper-right wall scaffolding/hardpoint. Do not place on ground."
+    },
+    {
+      "id": "cursor_hand_closed",
+      "file": "sprites/cursor/cursor_hand_closed.png",
+      "size": [
+        671,
+        1015
+      ],
+      "type": "cursor",
+      "anchor": "center",
+      "state": "closed",
+      "hotspot_hint": "center fist / slightly above wrist gem",
+      "recommended_display_height": 110,
+      "notes": "Closed grab state shown while the player is holding an enemy or object."
+    },
+    {
+      "id": "cursor_hand_open",
+      "file": "sprites/cursor/cursor_hand_open.png",
+      "size": [
+        806,
+        1107
+      ],
+      "type": "cursor",
+      "anchor": "center",
+      "state": "open",
+      "hotspot_hint": "center palm / slightly above wrist gem",
+      "recommended_display_height": 110,
+      "notes": "Default idle hover / open grab state for the player input cursor."
+    }
+  ]
+}

@@ -1,0 +1,2640 @@
+/* ============ CASTLE FLING — styles ============ */
+:root {
+  --ui-scale: 1;
+  /* tutorial panel shrink factor: the live value is written onto #tutBox by
+     tutorial.js — this root default only keeps the calc()s valid before the
+     first placement, and for anything that inherits from outside the panel */
+  --tut-fit: 1;
+  --world-scale: 1;
+  --game-view-width: 100vw;
+  --game-view-height: 56.25vw;
+  --game-offset-x: 0px;
+  --game-offset-y: 0px;
+  /* ---- safe area ----
+     Two sources, one result. env(safe-area-inset-*) is what the WebView itself
+     reports (and all the browser build ever has); --android-safe-* is measured
+     natively by MainActivity's WindowInsetsCompat listener and pushed in as CSS
+     px, which is the only way to learn about the navigation bar, the caption bar
+     and a landscape camera cutout on Android. Each side takes whichever is
+     larger. Everything downstream reads ONLY --safe-*, so an inset can never be
+     applied twice by two different layers. */
+  --android-safe-top: 0px;
+  --android-safe-right: 0px;
+  --android-safe-bottom: 0px;
+  --android-safe-left: 0px;
+  --safe-top: max(env(safe-area-inset-top, 0px), var(--android-safe-top));
+  --safe-right: max(env(safe-area-inset-right, 0px), var(--android-safe-right));
+  --safe-bottom: max(env(safe-area-inset-bottom, 0px), var(--android-safe-bottom));
+  --safe-left: max(env(safe-area-inset-left, 0px), var(--android-safe-left));
+  --ui-gap: calc(12px * var(--ui-scale));
+  --screen-pad-x: max(14px, var(--safe-left), var(--safe-right));
+  --screen-pad-y: max(14px, var(--safe-top), var(--safe-bottom));
+  --panel-max-h: calc(100dvh - var(--safe-top) - var(--safe-bottom) - 28px);
+  --panel-max-w: calc(100vw - var(--safe-left) - var(--safe-right) - 28px);
+  /* battle-HUD nudge: the two corner HUD groups ride slightly higher and
+     closer to their outer screen edges so more of the mid-field shows. One
+     shared offset pair — each group moves as a unit, and every anchor keeps
+     a hard floor off the physical edge. */
+  --battle-hud-up-shift: clamp(4px, 0.9vh, 8px);
+  --battle-hud-out-shift: clamp(5px, 0.7vw, 10px);
+  /* ...and a reduced share of the safe-area inset, applied ONLY to those two
+     corner groups (menus and every other screen still reserve the full inset).
+     Reserving 100% of it in battle pushed the pill row so far inboard that it
+     ran into the centred wave label on inset-heavy phones. Battle is immersive
+     — MainActivity hides the system bars and the bridge reports the insets
+     with getInsetsIgnoringVisibility(), i.e. space for bars that are not on
+     screen — so half of it is reserve the HUD does not need. The remaining
+     half still clears a landscape camera cutout, and the hard floors below
+     keep every group off the physical edge. */
+  --battle-hud-safe-keep: .5;
+  --battle-hud-anchor-top: max(4px, calc(10px - var(--battle-hud-up-shift)),
+                               calc(var(--safe-top) * var(--battle-hud-safe-keep) + 4px));
+  --battle-hud-anchor-left: max(5px, calc(12px - var(--battle-hud-out-shift)),
+                                calc(var(--safe-left) * var(--battle-hud-safe-keep) + 5px));
+  --battle-hud-anchor-right: max(5px, calc(12px - var(--battle-hud-out-shift)),
+                                 calc(var(--safe-right) * var(--battle-hud-safe-keep) + 5px));
+  /* ---- UI layer scale ----
+     One predictable stacking order for every absolutely-layered surface.
+     Screens and overlays pick from this list; nothing invents ad-hoc
+     z-index values above it. Map-marker depth (10–95) lives INSIDE the
+     isolated .krMap stacking context and can never reach these layers. */
+  --z-screen: 10;           /* full-screen menus (.screen)                */
+  --z-map-label: 200;       /* district labels, inside .krMap only        */
+  --z-overlay: 40;          /* kingdom overlay above the board            */
+  --z-tutorial: 55;         /* tutorial spotlight + panel over a screen   */
+  --z-confirm: 60;          /* themed confirm dialog                      */
+  --z-modal-backdrop: 1000; /* celebration modal backdrop + window        */
+  --z-rotate-gate: 2000;    /* landscape gate — above literally everything */
+}
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+  width: 100%; height: 100%; min-height: 100%;
+  overflow: hidden;
+  background: #12100e;
+  font-family: Georgia, 'Times New Roman', serif;
+  color: #f0e6d2;
+  overscroll-behavior: none;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+body { position: fixed; inset: 0; }
+
+#gameContainer {
+  position: fixed; inset: 0;
+  width: 100vw; height: 100vh; height: 100dvh;
+  display: flex; align-items: center; justify-content: center;
+  background: radial-gradient(ellipse at center, #1d1913 0%, #0c0a08 100%);
+  overflow: hidden;
+}
+
+#game {
+  display: block;
+  background: #6ea7d9;
+  box-shadow: 0 0 60px rgba(0,0,0,.8);
+  cursor: none;
+  touch-action: none;
+}
+/* full-bleed mode (screens wider than 16:9, e.g. landscape phones):
+   canvas fills the width and pins to the bottom so only sky crops above */
+#gameContainer.fullbleed #game {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  box-shadow: none;
+}
+
+.hidden { display: none !important; }
+
+/* ============ HUD ============ */
+#hud {
+  position: absolute; inset: 0;
+  pointer-events: none;
+  font-size: calc(16px * var(--ui-scale));
+  padding: var(--safe-top) var(--safe-right) var(--safe-bottom) var(--safe-left);
+}
+#hud > * { pointer-events: none; }
+#hud button { pointer-events: auto; }
+
+#hudTopLeft {
+  position: absolute;
+  top: var(--battle-hud-anchor-top);
+  left: var(--battle-hud-anchor-left);
+  display: flex; flex-direction: column; gap: calc(6px * var(--ui-scale));
+  max-width: min(46%, 420px);
+}
+#castleBarWrap { display: flex; align-items: center; gap: 6px; }
+/* ornate HUD life bar: painted frame (castle emblem baked into its left end),
+   with the dynamic fill clipped inside the frame's inner channel */
+#castleBar {
+  position: relative; width: min(248px, 29vw);
+  aspect-ratio: 2010 / 391;
+  background: url("assets/castle-fling/ui-polish/trimmed/hud_lifebar_frame_empty.png") no-repeat center / 100% 100%;
+  filter: drop-shadow(0 2px 5px rgba(0,0,0,.5));
+}
+#castleBarTrack {
+  position: absolute;
+  left: 16.2%; right: 8.2%; top: 32%; bottom: 31%;
+  border-radius: 999px;
+  overflow: hidden;
+  background: rgba(10, 14, 24, .55);
+}
+#castleBarFill {
+  height: 100%; width: 100%;
+  background: linear-gradient(180deg, #7ed957 0%, #3f9e2e 60%, #2d7a20 100%);
+  transition: width .25s ease;
+}
+#castleBarFill.hurt { background: linear-gradient(180deg,#e8a33d,#c0651c); }
+#castleBarFill.critical { background: linear-gradient(180deg,#e85d4a,#a32914); }
+#castleBarText {
+  position: absolute; left: 16.2%; right: 8.2%; top: 0; bottom: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: bold; color: #fff; text-shadow: 0 1px 2px #000, 0 0 4px #000;
+}
+#armorBadge { font-size: 14px; color: #cfd8e6; text-shadow: 0 1px 2px #000; }
+
+#upgradeChips { display: flex; flex-wrap: wrap; gap: 4px; max-width: 300px; }
+.chip {
+  background: rgba(24,33,52,.88); border: 1px solid #6f7887; border-radius: 10px;
+  font-size: 12px; padding: 2px 8px; color: #ffd77a; text-shadow: 0 1px 1px #000;
+  white-space: nowrap;
+}
+
+#hudTopCenter {
+  position: absolute;
+  top: max(8px, calc(var(--safe-top) + 6px));
+  left: 50%; transform: translateX(-50%); text-align: center;
+  max-width: 34%;
+}
+#waveLabel { font-size: calc(24px * var(--ui-scale)); font-weight: bold; color: #ffe9b0; text-shadow: 0 2px 3px #000, 0 0 12px rgba(255,200,80,.35); }
+#enemiesLeft { font-size: 13px; color: #e8d8b8; text-shadow: 0 1px 2px #000; }
+/* combo lives in the HTML HUD stack (own line under the wave info) so it can
+   never collide with the wave label the way the old canvas text did */
+#comboLabel {
+  display: inline-block; margin-top: 2px;
+  font-size: calc(15px * var(--ui-scale)); font-weight: bold; color: #ffb066;
+  text-shadow: 0 1px 2px #000, 0 0 10px rgba(255,140,40,.45);
+}
+
+#hudTopRight {
+  position: absolute;
+  top: var(--battle-hud-anchor-top);
+  right: var(--battle-hud-anchor-right);
+  display: flex; align-items: center; gap: calc(10px * var(--ui-scale));
+}
+.resource {
+  display: flex; align-items: center; gap: 5px;
+  background: linear-gradient(180deg, rgba(41,56,84,.92), rgba(18,25,40,.92));
+  border: 2px solid #9aa3b2; border-radius: 14px;
+  padding: 3px 12px; font-size: 17px; font-weight: bold; color: #ffe9b0;
+  text-shadow: 0 1px 2px #000;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.15), 0 2px 6px rgba(0,0,0,.4);
+}
+.resource.inline { display: inline-flex; font-size: 15px; vertical-align: middle; margin-left: 10px; }
+.resIcon { font-size: 15px; }
+/* sprite stars sized off the surrounding font so they occupy exactly the
+   box the old emoji did — layouts must not shift */
+img.resIcon, .starInline {
+  width: 1.1em; height: 1.1em; object-fit: contain;
+  vertical-align: -0.18em; display: inline-block;
+}
+img.resIcon { width: 17px; height: 17px; vertical-align: middle; }
+.levelBarText .starInline { margin-left: 3px; }
+
+.iconBtn {
+  width: 44px; height: 44px; border-radius: 10px;
+  background: linear-gradient(180deg,#3d5580,#1b2740);
+  border: 2px solid #9aa3b2; color: #ffe9b0; font-size: 16px;
+  cursor: pointer; text-shadow: 0 1px 2px #000;
+}
+.iconBtn:active { transform: scale(.94); }
+.iconBtn.imgBtn { background: none; border: none; padding: 0; width: 48px; height: 48px; }
+.iconBtn.imgBtn img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 3px 4px rgba(0,0,0,.6)); }
+
+/* ============ Ability bar ============ */
+#abilityBar {
+  position: absolute;
+  bottom: max(12px, calc(var(--safe-bottom) + 12px));
+  right: max(12px, calc(var(--safe-right) + 12px));
+  display: flex; gap: calc(10px * var(--ui-scale));
+  max-width: calc(100vw - var(--safe-left) - var(--safe-right) - 24px);
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.abilityBtn {
+  position: relative; width: 62px; height: 62px; border-radius: 14px;
+  background: linear-gradient(180deg,#35486b,#182238);
+  border: 3px solid #9aa3b2; color: #ffe9b0;
+  font-size: 26px; cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0,0,0,.5), inset 0 2px 0 rgba(255,255,255,.16);
+  display: flex; align-items: center; justify-content: center;
+}
+/* NO css filter here. The cooldown wipe inside .abilityBtn changes while a
+   cooldown ticks, so this subtree is the one piece of UI that repaints during
+   combat — a drop-shadow on it makes the compositor build an offscreen filter
+   surface on every one of those repaints, which is the DOM-side form of the
+   per-frame surface churn that crashed the Adreno driver (see the SPRITE_TINTS
+   note in game.js). The button's own box-shadow and dark plate already
+   separate the icon. */
+.abIco { width: 42px; height: 42px; object-fit: contain; pointer-events: none; }
+.abilityBtn:active { transform: scale(.94); }
+.abilityBtn .keyHint {
+  position: absolute; top: 2px; left: 5px; font-size: 11px; color: #c9b98f;
+  font-family: monospace;
+}
+.abilityBtn .cdOverlay {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 0%;
+  background: rgba(10,8,5,.78); border-radius: 0 0 12px 12px; pointer-events: none;
+}
+.abilityBtn.ready { border-color: #ffd77a; box-shadow: 0 0 14px rgba(255,205,90,.5), 0 4px 8px rgba(0,0,0,.5); }
+.abilityBtn.targeting { border-color: #7ad9ff; box-shadow: 0 0 16px rgba(120,215,255,.8); }
+.abilityBtn.spent { opacity: .35; }
+
+/* ============ Screens ============ */
+.screen {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  padding: var(--screen-pad-y) var(--screen-pad-x);
+  z-index: var(--z-screen, 10);
+  /* if a panel is ever taller than the viewport, scroll instead of clipping
+     it at both edges (flex centering overflows both ways otherwise) */
+  overflow-y: auto;
+}
+.screen > .panel, .screen > .menuPanel { margin: auto; }
+/* NO backdrop-filter. This class covers the upgrade, build, modifier, pause,
+   game-over, siege-result and ricochet-result screens — i.e. it is on screen
+   between every single wave — and the battlefield canvas underneath keeps
+   repainting every frame in those states. A backdrop blur therefore made the
+   compositor allocate and release a VIEWPORT-SIZED offscreen blur surface 60
+   times a second (2400x1350 on a Galaxy S20 FE), the same EGL-sync churn that
+   crashed the Adreno driver in gsl_syncobj_destroy — on a far bigger scale
+   than the sprite tints that were fixed first. At 72% black the 2px blur was
+   barely perceptible anyway; the scrim alone carries the effect. */
+.screen.dim { background: rgba(8,6,4,.76); }
+#menuScreen { background: transparent; }
+
+.panel, .menuPanel {
+  position: relative;   /* anchors the scroll-hint pill */
+  background: linear-gradient(180deg, #33415c 0%, #1a2233 60%, #131a29 100%);
+  border: 3px solid #9aa3b2; border-radius: 12px;
+  outline: 2px solid #3d4657; outline-offset: -6px;
+  padding: calc(22px * var(--ui-scale)) calc(30px * var(--ui-scale)); text-align: center;
+  box-shadow: 0 10px 40px rgba(0,0,0,.75), inset 0 2px 0 rgba(255,255,255,.14), inset 0 -3px 8px rgba(0,0,0,.5);
+  max-width: min(92vw, 560px);
+  max-width: min(var(--panel-max-w), 560px);
+  max-height: 92vh;
+  max-height: var(--panel-max-h);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.panel.wide { max-width: min(94vw, 1040px); max-width: min(var(--panel-max-w), 1040px); width: 100%; }
+.panel.tall { max-height: 94vh; max-height: var(--panel-max-h); }
+.panel.noBg { background: none; border: none; box-shadow: none; overflow-y: auto; }
+
+/* no backdrop-filter (see .screen.dim): the theme pack already overrode it to
+   none far below, and leaving the declaration here only re-arms the trap if
+   that block is ever edited */
+.menuPanel { padding: calc(24px * var(--ui-scale)) calc(46px * var(--ui-scale)) calc(30px * var(--ui-scale)); background: rgba(16, 21, 33, .82); }
+/* The menu is a flex column whose ONLY shrinkable row is the logo: when a
+   system-bar or cutout inset eats into --panel-max-h between breakpoints,
+   the deficit comes out of the artwork (object-fit keeps its aspect, the
+   art just renders smaller) — never out of buttons, the level bar or the
+   Terms & Privacy line. Text rows keep their intrinsic height (flex
+   min-height:auto), so nothing readable ever compresses. */
+.menuPanel { display: flex; flex-direction: column; align-items: stretch; }
+#logoImg { flex: 0 1 auto; min-height: 0; object-fit: contain; }
+/* the menu carries a 2×2 primary grid plus a five-slot icon row, so it runs
+   wider than the generic .panel — still inside the safe-area-aware cap */
+.menuPanel { max-width: min(var(--panel-max-w), 640px); }
+#logoImg {
+  display: block; margin: 0 auto;
+  /* height-aware from the start: the logo is the menu's tallest decorative
+     element, so it gives up height continuously as the viewport shortens
+     instead of waiting for a breakpoint cliff (44dvh ≈ full size at ≥820px,
+     the plain min() line is the pre-dvh fallback) */
+  width: min(520px, 84vw);
+  width: min(520px, 58dvh, 84vw);
+  height: auto;
+  margin-bottom: calc(10px * var(--ui-scale));
+  filter: drop-shadow(0 8px 18px rgba(0,0,0,.7));
+  user-select: none; -webkit-user-drag: none;
+}
+
+h2 { color: #ffe9b0; font-size: calc(26px * var(--ui-scale)); margin-bottom: calc(14px * var(--ui-scale)); text-shadow: 0 2px 4px #000; }
+h3 { color: #e8d8b8; margin: 10px 0; }
+.glowTitle { text-shadow: 0 0 20px rgba(255,210,90,.6), 0 2px 4px #000; }
+.doomTitle { color: #ff7a5c; text-shadow: 0 0 20px rgba(255,80,40,.5), 0 2px 4px #000; }
+.subtext { color: #cbb98f; font-size: 14px; margin-bottom: 8px; }
+
+/* ---- main menu actions: 2×2 primary grid + one compact icon row ----
+   The four primary buttons are the only large buttons on the menu; the five
+   supporting modes live in .menuIconRow underneath. Both stay centred as one
+   group so the icon row never floats off toward the screen edge. */
+.menuActions { display: flex; flex-direction: column; align-items: center; gap: var(--ui-gap); }
+.menuButtons {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-auto-rows: 1fr;              /* all four keep one height, even if a label wraps */
+  gap: var(--ui-gap); width: 100%;
+}
+/* Continue is hidden until a run is saved (existing behaviour) — Play then
+   spans the row so the grid stays balanced instead of leaving a gap */
+.menuButtons.noContinue #btnPlay { grid-column: 1 / -1; }
+/* half-width buttons carry longer labels than the old full-width stack —
+   "Continue Run (wave 12)" has to stay on one line, or the wrap grows every
+   button in the grid and eats the vertical budget on short screens */
+.menuButtons > .bigBtn {
+  width: 100%; margin-top: 0;
+  font-size: calc(16px * var(--ui-scale));
+  padding-left: calc(14px * var(--ui-scale)); padding-right: calc(14px * var(--ui-scale));
+  white-space: nowrap; min-width: 0; overflow: hidden;
+}
+.menuButtons > .bigBtn .btnIco { margin-right: 6px; }
+
+/* Five slots on one line, FIVE EQUAL COLUMNS. Equal tracks are what make the
+   five button centres evenly spaced: the earlier
+   `1fr auto auto auto 1fr` sized the middle three tracks to their content, so
+   the wide Ricochet logo stretched its own track and the leftover slack all
+   went to the two outer 1fr ends — Ricochet stayed on the midline but the
+   centre-to-centre gaps came out 103 / 112 / 112 / 103 px. With
+   repeat(5, 1fr) every centre sits at (n + 0.5) × track, so the spacing is
+   equal by construction and the outer margins match. */
+.menuIconRow {
+  /* equal columns must be at least as wide as the widest sprite (the Ricochet
+     logo, ~107px at the full icon slot) or it would have to shrink to fit.
+     A small bleed into the panel's generous side padding buys those few px so
+     every sprite keeps its intended size; it collapses on short screens where
+     the padding itself is already tight. */
+  --ico-bleed: clamp(0px, 2vw, 24px);
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  align-items: start; justify-items: center;
+  gap: clamp(6px, 1.4vw, 14px);
+  width: calc(100% + 2 * var(--ico-bleed));
+  margin-inline: calc(-1 * var(--ico-bleed));
+  position: relative;
+}
+/* every icon shares ONE visual box height, so the five sprites read as the
+   same size however their source aspect ratios differ; only the box WIDTH
+   varies per icon. --ico-fit trims residual transparent padding per asset. */
+.menuIcoBtn {
+  --ico-slot: clamp(52px, 5.6vw, 68px);
+  --ico-w: clamp(54px, 5.8vw, 68px);
+  --ico-fit: 1;
+  /* --ico-w is the icon's intended footprint and stays the target size; the
+     min() only stops the two wide sprites from spilling past their equal
+     column on narrow panels (the img keeps its aspect ratio as it shrinks) */
+  flex: 0 0 auto; width: min(var(--ico-w), 100%);
+  min-width: 44px; min-height: 44px;               /* touch-target floor */
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  padding: 0; border: 0; background: none; cursor: pointer;
+  font-family: inherit; color: #f0e6d2;
+  -webkit-tap-highlight-color: transparent;
+  position: relative;
+}
+.menuIcoBtn__visual {
+  display: flex; align-items: center; justify-content: center;
+  width: 100%; height: var(--ico-slot);
+  transition: transform .1s ease, filter .15s ease;
+  transform: scale(var(--ico-fit));
+}
+.menuIcoBtn__visual img {
+  max-width: 100%; max-height: 100%; width: auto; height: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 3px 5px rgba(0, 0, 0, .55));
+  user-select: none; -webkit-user-drag: none;
+}
+/* wider crest sign and logo keep their own footprints (§ icon row sizing) */
+.menuIcoBtn--board { --ico-w: clamp(84px, 8.8vw, 108px); }
+.menuIcoBtn--rico  { --ico-w: clamp(96px, 10.4vw, 128px); }
+/* the settings gear sprite carries a touch more transparent margin than the
+   rest of the set — nudge it up to read at the same size */
+.menuIcoBtn--settings { --ico-fit: 1.06; }
+.menuIcoBtn--milestones { --ico-fit: 1.04; }
+
+/* Castle Ricochet: the approved logo IS the button, with its countdown
+   directly beneath it in normal flow — one component, one hit area.
+   This one button stretches to fill its equal column (the logo still sits
+   centred at its own size inside it) so the longest countdown,
+   "Available in 59:59", has the whole column to render in and never has to
+   ellipsize or spill into a neighbour's track. */
+.menuIcoBtn--rico { justify-self: stretch; width: auto; }
+.menuIcoBtn--rico .menuIcoBtn__visual { width: min(var(--ico-w), 100%); }
+.menuIcoBtn--rico .menuIcoBtn__timer {
+  display: block; max-width: 100%;
+  /* sized so the longest string fits the column outright — the equal columns
+     are narrower than the old content-sized Ricochet track was */
+  font-size: clamp(9.5px, .85vw, 10.5px); font-weight: bold; letter-spacing: .02em;
+  line-height: 1.15; color: #cbb98f; text-shadow: 0 1px 2px #000;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* hover / press / focus — transform the inner visual only, so the hit area
+   and the row's layout never move */
+@media (hover: hover) and (pointer: fine) {
+  .menuIcoBtn:hover .menuIcoBtn__visual {
+    transform: scale(calc(var(--ico-fit) * 1.03)) translateY(-2px);
+    filter: drop-shadow(0 0 7px rgba(255, 210, 100, .55));
+  }
+}
+.menuIcoBtn:active .menuIcoBtn__visual { transform: scale(var(--ico-fit)) translateY(3px); filter: brightness(.94); }
+.menuIcoBtn:focus-visible { outline: none; }
+.menuIcoBtn:focus-visible .menuIcoBtn__visual {
+  outline: 3px solid #ffd77a; outline-offset: 3px; border-radius: 8px;
+}
+.bigBtn:focus-visible { outline: 3px solid #ffd77a; outline-offset: 3px; }
+.menuIcoBtn:disabled { cursor: default; }
+.menuIcoBtn:disabled .menuIcoBtn__visual { filter: grayscale(.7) brightness(.6); transform: scale(var(--ico-fit)); }
+
+/* notification pip — small, cornered, never over the artwork's subject */
+.menuIcoBtn__badge {
+  position: absolute; top: -3px; right: -2px;
+  min-width: 17px; height: 17px; padding: 0 4px; box-sizing: border-box;
+  border-radius: 9px; background: linear-gradient(180deg, #e8483a, #a8231a);
+  border: 1.5px solid #ffe0a8; color: #fff;
+  font-size: 11px; font-weight: bold; line-height: 14px; text-align: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .6);
+  pointer-events: none;
+}
+.menuIcoBtn__badge:empty { display: none; }
+/* Ricochet's "ready" state is carried by its countdown line going gold */
+.menuIcoBtn--board { z-index: 0; }
+
+/* desktop-only name tooltip above the row: never on touch (nothing to get
+   stuck), never affects layout */
+@media (hover: hover) and (pointer: fine) {
+  .menuIcoBtn[data-tip]::after {
+    content: attr(data-tip);
+    position: absolute; bottom: calc(100% + 8px); left: 50%;
+    transform: translateX(-50%);
+    width: max-content; max-width: 210px;
+    padding: 5px 9px; border-radius: 7px;
+    background: rgba(16, 21, 33, .96); border: 1px solid #6b5734;
+    color: #f0e6d2; font-size: 12px; font-weight: normal; line-height: 1.3;
+    text-shadow: 0 1px 2px #000; box-shadow: 0 4px 12px rgba(0, 0, 0, .6);
+    opacity: 0; visibility: hidden; transition: opacity .12s ease .25s, visibility 0s linear .37s;
+    pointer-events: none; z-index: 5; white-space: normal;
+  }
+  .menuIcoBtn[data-tip]:hover::after,
+  .menuIcoBtn[data-tip]:focus-visible::after {
+    opacity: 1; visibility: visible; transition-delay: .25s, 0s;
+  }
+}
+
+.bigBtn {
+  font-family: inherit; font-size: calc(20px * var(--ui-scale)); font-weight: bold;
+  padding: calc(12px * var(--ui-scale)) calc(26px * var(--ui-scale)); border-radius: 10px; cursor: pointer;
+  background: linear-gradient(180deg, #3d5580 0%, #24344f 55%, #1b2740 100%);
+  border: 3px solid #9aa3b2; color: #f0e6d2;
+  text-shadow: 0 1px 2px #000;
+  box-shadow: 0 4px 10px rgba(0,0,0,.55), inset 0 2px 0 rgba(255,255,255,.18), inset 0 -3px 6px rgba(0,0,0,.4);
+  transition: transform .08s ease, box-shadow .15s;
+  min-height: max(52px, calc(52px * var(--ui-scale)));
+  display: flex; align-items: center; justify-content: center; gap: 4px;
+}
+.btnIco { width: 30px; height: 30px; object-fit: contain; margin-right: 8px; filter: drop-shadow(0 2px 2px rgba(0,0,0,.5)); }
+.ico { width: 20px; height: 20px; object-fit: contain; vertical-align: -4px; margin-left: 4px; }
+/* inline currency icon: fills exactly the 1em slot the old emoji glyph used,
+   so surrounding text, padding and button sizes never shift */
+.curIco { width: 1em; height: 1em; object-fit: contain; vertical-align: -0.12em; }
+/* emoji rendered inside a howto icon slot (matches .howtoIco footprint) */
+.howtoEmoji { display: inline-flex; align-items: center; justify-content: center; font-size: 26px; filter: drop-shadow(0 2px 2px rgba(0,0,0,.5)); }
+/* nightmare sigil sprite in the new-run toggle row */
+.sigilIco { width: 30px; height: 30px; object-fit: contain; flex: none; vertical-align: middle; filter: drop-shadow(0 2px 2px rgba(0,0,0,.5)); }
+/* milestone category sprite fills its fixed .msIcon box (contain, never
+   stretched or cropped — the circular frames all read as the same size) */
+.msIcon img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 2px 2px rgba(0,0,0,.5)); }
+/* Holy Grail in the milestone screen heading: 1em slot beside the live text */
+.headIco { width: 1.15em; height: 1.15em; object-fit: contain; vertical-align: -0.2em; filter: drop-shadow(0 2px 2px rgba(0,0,0,.5)); }
+/* main-game game-over banner (Castle Ricochet set) */
+#goBanner { display: block; width: min(72%, 300px); margin: 0 auto 6px; object-fit: contain; filter: drop-shadow(0 4px 8px rgba(0,0,0,.6)); }
+.doomTitle.goSub { font-size: 18px; margin: 0 0 8px; }
+.ico.big { width: 30px; height: 30px; vertical-align: -8px; }
+.rowIco { width: 38px; height: 38px; object-fit: contain; flex: none; filter: drop-shadow(0 2px 2px rgba(0,0,0,.5)); }
+/* how-to-play instruction icons: aligned with the first text line */
+.howtoIco { width: 36px; height: 36px; object-fit: contain; flex: none; margin-top: 1px; filter: drop-shadow(0 2px 2px rgba(0,0,0,.5)); }
+/* dangerous-bargain emblem + heading icon */
+.modIcon { display: block; width: 58px; height: 58px; object-fit: contain; margin: 0 auto 6px; filter: drop-shadow(0 3px 4px rgba(0,0,0,.55)); }
+.hIco { width: 34px; height: 34px; object-fit: contain; vertical-align: -9px; margin-right: 4px; }
+.bigBtn:hover { transform: translateY(-2px); box-shadow: 0 6px 14px rgba(0,0,0,.6); }
+.bigBtn:active { transform: translateY(1px) scale(.98); }
+.bigBtn.gold {
+  background: linear-gradient(180deg, #d9a838 0%, #9a6d1a 100%);
+  border-color: #ffe9b0; color: #2a1c05; text-shadow: 0 1px 0 rgba(255,255,255,.4);
+}
+.bigBtn.danger { background: linear-gradient(180deg,#8a3626,#5a1d12); border-color: #d97a5c; }
+.bigBtn.small { font-size: calc(16px * var(--ui-scale)); padding: calc(10px * var(--ui-scale)) calc(20px * var(--ui-scale)); margin-top: var(--ui-gap); min-height: max(44px, calc(44px * var(--ui-scale))); }
+.bigBtn.ghost { background: transparent; border-color: #6b5734; color: #cbb98f; }
+.bigBtn:disabled { opacity: .4; cursor: default; transform: none; }
+
+.crownTag { color: #ffd77a; font-size: .85em; }
+#menuBest { margin-top: 18px; color: #a8946a; font-size: 14px; }
+/* before the first run this line has no content — collapse it completely so
+   it cannot contribute a stray margin under the level bar */
+#menuBest:empty { display: none; margin: 0; }
+
+/* ============ Cards (upgrades / castles) ============ */
+.cardRow { display: flex; gap: calc(14px * var(--ui-scale)); justify-content: center; flex-wrap: wrap; margin: var(--ui-gap) 0; }
+/* Castle select only: a real grid instead of the wrapping flex row, so all
+   four castles are ALWAYS on screen at once — four fluid columns normally,
+   a 2×2 on narrow windows (split-screen). The wrap-and-scroll failure mode
+   ("Scroll for more" under the fourth card) cannot occur: tracks shrink,
+   cards fill them, and the row count is a deliberate layout decision. The
+   upgrade-choice #cardRow keeps the flex behaviour untouched. */
+#castleList {
+  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
+  max-width: 920px; width: 100%; margin-left: auto; margin-right: auto;
+}
+#castleList .pickCard { width: auto; min-height: 0; }
+@media (max-width: 767px) {
+  #castleList { grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: 460px; }
+}
+.pickCard {
+  width: 200px; min-height: 210px; padding: 14px 12px;
+  background: linear-gradient(180deg, #35486b 0%, #1c2740 70%, #141d30 100%);
+  border: 3px solid #9aa3b2; border-radius: 14px;
+  outline: 2px solid #3d4657; outline-offset: -5px;
+  cursor: pointer; text-align: center;
+  transition: border-color .12s ease, outline-color .12s ease, box-shadow .2s;
+  display: flex; flex-direction: column; align-items: center; gap: calc(8px * var(--ui-scale));
+  box-shadow: 0 6px 14px rgba(0,0,0,.5), inset 0 2px 0 rgba(255,255,255,.12);
+}
+.cardArt {
+  height: 84px; max-width: 150px; object-fit: contain;
+  filter: drop-shadow(0 4px 6px rgba(0,0,0,.6));
+  user-select: none; -webkit-user-drag: none;
+}
+/* no transform on hover/active — cards must never grow or shift (the old
+   translate/scale clipped against the panel edge); feedback is outline + glow */
+.pickCard:hover {
+  border-color: #ffd77a; outline-color: #ffd77a;
+  box-shadow: 0 0 22px rgba(255,205,90,.5), 0 6px 14px rgba(0,0,0,.5), inset 0 2px 0 rgba(255,255,255,.12);
+}
+.pickCard:active {
+  border-color: #ffe9a8; outline-color: #ffe9a8;
+  box-shadow: 0 0 26px rgba(255,215,110,.65), 0 6px 14px rgba(0,0,0,.5), inset 0 2px 0 rgba(255,255,255,.12);
+}
+.pickCard .cardIcon { font-size: 42px; filter: drop-shadow(0 3px 3px rgba(0,0,0,.6)); }
+.pickCard .cardName { font-size: 18px; font-weight: bold; color: #ffe9b0; }
+.pickCard .cardDesc { font-size: 13px; color: #cbb98f; line-height: 1.35; }
+.pickCard .cardLvl { font-size: 12px; color: #7ad9a0; }
+.pickCard.locked { opacity: .55; filter: grayscale(.6); }
+.pickCard.selected { border-color: #7ed957; box-shadow: 0 0 20px rgba(126,217,87,.5); }
+
+/* ============ Rooms ============ */
+#roomList { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr)); gap: var(--ui-gap); text-align: left; }
+.roomCard {
+  background: linear-gradient(180deg, rgba(38,52,79,.85), rgba(17,24,38,.9));
+  border: 2px solid #6f7887; border-radius: 12px;
+  padding: calc(10px * var(--ui-scale)) calc(12px * var(--ui-scale)); display: flex; flex-direction: column; gap: calc(7px * var(--ui-scale));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.1);
+}
+.roomBody { display: flex; gap: 10px; align-items: center; }
+.roomArt { width: 58px; height: 62px; object-fit: contain; flex-shrink: 0; filter: drop-shadow(0 3px 4px rgba(0,0,0,.6)); }
+.roomText { flex: 1; min-width: 0; }
+.roomCard .roomHead { display: flex; justify-content: space-between; align-items: center; }
+.roomCard .roomName { font-weight: bold; color: #ffe9b0; font-size: 16px; }
+.roomCard .pips { color: #ffd77a; font-size: 13px; letter-spacing: 0; }
+.roomCard .roomDesc { font-size: 12.5px; color: #cbb98f; line-height: 1.3; min-height: 32px; }
+.roomCard .roomLvl { color: #7ad9a0; font-weight: bold; }
+.roomCard .pipNext { color: #ffd77a; text-shadow: 0 0 4px rgba(255,215,122,.7); }
+
+/* ============ Publisher intro splash ============ */
+#introSplash {
+  position: fixed; inset: 0; z-index: 200;
+  background: #000;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 1; transition: opacity .45s ease;
+  cursor: pointer;
+}
+#introSplash video { max-width: 100%; max-height: 100%; pointer-events: none; }
+#introSkip {
+  position: absolute; right: 18px; bottom: 14px;
+  color: rgba(255,255,255,.45); font-size: 13px;
+  pointer-events: none;
+}
+.roomBtn {
+  font-family: inherit; font-size: 15px; font-weight: bold;
+  padding: 8px 12px; border-radius: 8px; cursor: pointer; min-height: 42px;
+  background: linear-gradient(180deg,#d9a838,#9a6d1a); border: 2px solid #ffe9b0; color: #2a1c05;
+}
+.roomBtn:disabled { background: #3d3325; border-color: #6b5734; color: #8a7a5c; cursor: default; }
+.roomBtn:not(:disabled):active { transform: scale(.97); }
+/* grid rows equalize card heights; pinning the button to the card bottom
+   keeps every Build/Upgrade button on one line across a row */
+.roomCard .roomBtn { margin-top: auto; }
+
+/* ============================================================
+   TUTORIAL OVERLAY (Castle Rooms steps)
+
+   The battle steps are painted on the canvas (see tutorial.js), which the
+   DOM screens sit above — so the Castle Rooms steps paint the SAME panel
+   here. Every value below is the canvas panel's value: rgba(16,14,20,.88)
+   fill, rgba(201,169,74,.9) 3px gold frame, sharp corners, Georgia, #ffd77a
+   titles, #ffe9b0 body, #c9b98f hints, the gold #d9a838→#9a6d1a primary pill
+   and the same 1.38s ring pulse / 190ms rise. One tutorial, one look.
+   ============================================================ */
+#tutOverlay {
+  position: fixed; inset: 0;
+  z-index: var(--z-tutorial, 55);
+  pointer-events: none;
+}
+/* no spotlight target this step: the dim goes on the whole overlay instead */
+#tutOverlay.dimAll { background: rgba(8,6,10,.66); }
+
+/* The visible game area, measured rather than assumed. window.innerHeight is
+   not it: an Android WebView reports the pre-inset window, and 100dvh moves
+   with the browser chrome. This probe resolves dvh AND the safe-area insets
+   in one rect the panel can be clamped against on every device. */
+#tutSafe {
+  position: fixed; visibility: hidden; pointer-events: none;
+  left: var(--safe-left); right: var(--safe-right);
+  top: var(--safe-top);
+  height: calc(100dvh - var(--safe-top) - var(--safe-bottom));
+}
+
+/* the spotlight IS the dim: one huge spread with a hole where the real
+   control is. Sized every frame from the target's rendered bounds, so it
+   stays locked through regrids, rotation and room-list re-renders. */
+#tutSpot {
+  position: fixed; border-radius: 12px; pointer-events: none;
+  box-shadow: 0 0 0 9999px rgba(8,6,10,.66);
+}
+.tutSpotRing {
+  position: absolute; inset: -5px; border-radius: 16px;
+  border: 3px solid rgba(255,214,74,.95);
+  box-shadow: 0 0 18px 3px rgba(255,214,74,.32);
+  animation: tutPulse 1.38s ease-in-out infinite;
+}
+@keyframes tutPulse {
+  0%, 100% { transform: scale(1); opacity: .88; }
+  50% { transform: scale(1.035); opacity: 1; }
+}
+
+/* animated pointer — a pure CSS shape (no glyph, no emoji). Base orientation
+   points LEFT with its tip on the anchor; the anchor is the spotlight edge
+   nearest the panel, and data-dir rotates the whole arrow into place. */
+#tutArrow { position: fixed; width: 0; height: 0; transform-origin: 0 0; pointer-events: none; }
+#tutArrow[data-dir="bottom"] { transform: rotate(90deg); }
+#tutArrow[data-dir="top"] { transform: rotate(-90deg); }
+#tutArrow[data-dir="right"] { transform: none; }
+#tutArrow[data-dir="left"] { transform: rotate(180deg); }
+#tutArrow > span { position: absolute; animation: tutBob 1s ease-in-out infinite; }
+.tutArrowHead {
+  left: 0; top: -10px; width: 0; height: 0;
+  border-right: 15px solid rgba(255,214,74,.92);
+  border-top: 10px solid transparent; border-bottom: 10px solid transparent;
+  filter: drop-shadow(0 2px 3px rgba(0,0,0,.55));
+}
+.tutArrowShaft {
+  left: 14px; top: -3.5px; width: 24px; height: 7px; border-radius: 4px;
+  background: rgba(255,214,74,.92);
+  box-shadow: 0 2px 3px rgba(0,0,0,.5);
+}
+@keyframes tutBob { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(8px); } }
+
+/* The panel body never takes input: only the pills do. A tutorial panel is
+   there to be read, so nothing about it should ever be able to swallow a tap
+   meant for the room card underneath it — whatever placement the screen
+   forces, the real Castle Rooms controls stay reachable. */
+#tutBox {
+  position: fixed; pointer-events: none;
+  /* live shrink factor, written by tutorial.js — see "one panel, always whole".
+     Type, padding and the pill height all ride on it together, so the panel
+     gets SMALLER rather than shorter and no step is ever cut off. */
+  --tut-fit: 1;
+  display: flex; flex-direction: column;
+  width: min(430px, calc(100vw - var(--safe-left) - var(--safe-right) - 26px));
+  /* the live cap is written by tutorial.js from the measured safe viewport;
+     this is only the fallback for the frame before the first placement */
+  max-height: calc(100dvh - var(--safe-top) - var(--safe-bottom) - 24px);
+  background: rgba(16,14,20,.88);
+  border: 3px solid rgba(201,169,74,.9);
+  box-shadow: 0 10px 34px rgba(0,0,0,.72);
+  padding: calc(13px * var(--ui-scale) * var(--tut-fit))
+           calc(15px * var(--ui-scale) * var(--tut-fit))
+           calc(11px * var(--ui-scale) * var(--tut-fit));
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: calc(14.5px * var(--ui-scale) * var(--tut-fit));
+  text-align: center;
+  overflow: hidden;
+}
+#tutBox.tutRise { animation: tutRise .19s ease-out; }
+@keyframes tutRise { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+/* The reading half NEVER scrolls. A tutorial step the player has to drag to
+   finish reading is a step they will not finish reading — and this panel is
+   pointer-transparent, so a drag on it would fall through to the board behind
+   it anyway. tutorial.js sizes the panel to hold the whole step instead. */
+#tutBody {
+  flex: 1 1 auto; min-height: 0;
+  overflow: hidden;
+}
+#tutTitle {
+  color: #ffd77a; font-size: 1.18em; font-weight: bold;
+  letter-spacing: .4px; margin: 0 0 calc(5px * var(--tut-fit)); text-shadow: 0 1px 2px #000;
+}
+#tutText { color: #ffe9b0; font-weight: bold; line-height: 1.34; margin: 0; }
+#tutHint { color: #c9b98f; font-size: .8em; font-weight: normal; margin: calc(6px * var(--tut-fit)) 0 0; }
+#tutHint.done { color: #9fe0a8; }
+/* wraps rather than clips: BACK · progress · SKIP · NEXT are all navigation,
+   and a hidden NEXT is a dead end with no way out of the step */
+#tutNav {
+  flex: none;
+  display: flex; align-items: center; justify-content: center;
+  flex-wrap: wrap; gap: 8px; row-gap: 6px;
+  margin-top: calc(10px * var(--ui-scale) * var(--tut-fit));
+}
+/* basis 0, so this cell's width is the row's leftover space and is the SAME
+   whether it is holding dots or the counter — tutorial.js' fit test relies on
+   that to stay stable instead of flip-flopping between the two forms */
+#tutDots {
+  flex: 1 1 0; min-width: 0;
+  display: flex; align-items: center; justify-content: center; gap: 7px;
+  color: #c9b98f; font-size: .84em;
+}
+/* too many steps to draw one dot each: the canvas panel falls back to a
+   "7 / 16" counter, so the DOM panel does exactly the same */
+#tutDots.count { gap: 0; white-space: nowrap; }
+.tutDot {
+  display: inline-block; flex: none; width: 9px; height: 9px; border-radius: 50%;
+  border: 2px solid rgba(201,169,74,.45); box-sizing: border-box;
+}
+.tutDot.past { background: rgba(201,169,74,.55); border-color: transparent; }
+.tutDot.at { background: #ffd77a; border-color: transparent; }
+/* the pills shrink with the panel but never below a real thumb target */
+.tutPill {
+  font-family: inherit; font-weight: bold; font-size: .92em;
+  padding: calc(6px * var(--tut-fit)) 15px;
+  min-height: max(30px, calc(34px * var(--ui-scale) * var(--tut-fit)));
+  border-radius: 999px; cursor: pointer; flex: none; white-space: nowrap;
+  pointer-events: auto;
+  background: rgba(14,12,18,.82); border: 2px solid rgba(201,169,74,.75); color: #ffe9b0;
+}
+.tutPill--gold {
+  background: linear-gradient(180deg, #d9a838, #9a6d1a);
+  border: 3px solid #ffe9b0; color: #2a1c05;
+}
+.tutPill:disabled { opacity: .42; cursor: default; }
+.tutPill:not(:disabled):active { transform: translateY(2px); }
+@media (hover: hover) and (pointer: fine) {
+  .tutPill:not(:disabled):hover { filter: brightness(1.12); }
+}
+
+/* ---- what the guided rooms steps allow ----
+   Re-applied by tutorial.js every frame, because renderBuild() rebuilds the
+   card DOM after every build and upgrade. Save Run and Abandon Run are gone
+   for the duration: a practice run has nothing to save or abandon. */
+#buildScreen.tutBuildLock #btnSaveRun,
+#buildScreen.tutBuildLock #btnAbandonRun,
+#buildScreen.tutBuildLock #defenderPanel { display: none !important; }
+#buildScreen #btnNextWave.tutHold { opacity: .5; pointer-events: none; }
+#roomList .roomCard.tutDim { opacity: .34; filter: grayscale(.6); pointer-events: none; }
+/* the Build/Upgrade button is only live on the step that asks for it */
+#roomList .roomCard.tutNoBtn .roomBtn { pointer-events: none; }
+#roomList .roomCard.tutTarget {
+  border-color: #ffd77a;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.1), 0 0 20px rgba(255,214,74,.32);
+}
+#roomList .roomCard.tutPick { cursor: pointer; }
+
+/* ---- Adventurers' Board tutorial: the loop-summary chain ----
+   Approved sprites inside the SAME panel and type ramp — the icons size off
+   the panel text, so every viewport keeps them aligned with their labels. */
+#tutText .btLead { display: block; margin-bottom: 8px; }
+#tutText .btChain { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+#tutText .btChainRow { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; }
+#tutText .btIco {
+  height: 1.25em; width: auto; max-width: 1.9em; object-fit: contain;
+  filter: drop-shadow(0 2px 2px rgba(0,0,0,.5));
+}
+#tutText .btChainArrow { color: #c9b98f; line-height: 1; font-size: .9em; }
+
+#defenderPanel { margin-top: 0; border-top: 1px solid #6f7887; padding-top: var(--ui-gap); }
+#defAssign { display: flex; gap: var(--ui-gap); justify-content: center; flex-wrap: wrap; align-items: stretch; }
+.assignRow { display: flex; align-items: center; gap: 8px; background: rgba(24,33,52,.8); padding: 8px 12px; border-radius: 10px; border: 1px solid #6f7887; min-height: 52px; }
+.assignRow button {
+  width: 38px; height: 38px; font-size: 18px; border-radius: 8px; cursor: pointer;
+  background: linear-gradient(180deg,#3d5580,#1b2740); border: 2px solid #9aa3b2; color: #ffe9b0;
+}
+.assignRow button:disabled { opacity: .35; }
+
+.buildPanel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-gap);
+  overflow: hidden;
+}
+.panelHeader,
+.panelFooter {
+  flex: 0 0 auto;
+}
+.panelHeader h2 {
+  margin-bottom: 0;
+}
+.panelBody {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.buildPanelBody {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-gap);
+  padding-right: 4px;
+}
+.actionFooter {
+  border-top: 1px solid #6f7887;
+  padding-top: var(--ui-gap);
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.actionFooter .bigBtn.small { margin-top: 0; }
+
+/* ============ Milestones ============ */
+/* list scrolls, title + Back stay pinned (list outgrew short screens) */
+#milestoneScreen .panel { display: flex; flex-direction: column; overflow: hidden; }
+#milestoneScreen .panel h2, #btnMilestonesBack { flex: 0 0 auto; }
+#btnMilestonesBack { align-self: center; }
+#milestoneList { display: flex; flex-direction: column; gap: 8px; text-align: left; overflow-y: auto; min-height: 0; overscroll-behavior: contain; }
+.milestoneItem {
+  display: flex; align-items: center; gap: 12px;
+  background: linear-gradient(180deg, rgba(38,52,79,.85), rgba(17,24,38,.9));
+  border: 2px solid #6f7887; border-radius: 10px; padding: 8px 12px;
+}
+.milestoneItem.claimed { opacity: .55; }
+/* one fixed icon container for every category (emoji fallback centres in it) */
+.msIcon { width: 40px; height: 40px; flex: none; display: flex; align-items: center; justify-content: center; font-size: 26px; }
+@media (max-width: 480px), (max-height: 480px) { .msIcon { width: 34px; height: 34px; } }
+.msBody { flex: 1; min-width: 0; }
+.msName { font-weight: bold; color: #ffe9b0; font-size: 15px; }
+.msDesc { font-size: 12px; color: #cbb98f; }
+.msBar { height: 6px; background: rgba(0,0,0,.45); border-radius: 3px; margin-top: 4px; overflow: hidden; }
+.msFill { height: 100%; background: linear-gradient(90deg, #7ad9a0, #4ec27e); border-radius: 3px; }
+.msDone { color: #7ed957; font-size: 20px; flex: none; }
+/* Milestone claim button: rewards are coins, so the figure can run to four
+   digits ("1,500"). The button keeps its shared .roomBtn footprint, padding
+   and lock-emblem lane — only the TEXT is constrained: never wrapped to a
+   second line, digits set at a fixed advance so the width doesn't jitter
+   between tiers, and .msBody (min-width:0) gives up the space instead. */
+.milestoneItem .roomBtn { flex: none; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.milestoneItem .roomBtn .curIco { margin-left: 1px; }
+/* narrow phones: shave the reward text, never the button box or the emblem */
+@media (max-width: 380px) {
+  .milestoneItem .roomBtn { font-size: 13px; padding-left: 8px; }
+}
+
+/* ============ Player level UI (badge + sprite progress bar) ============ */
+.levelBadge {
+  position: relative; display: inline-flex; align-items: center; justify-content: center;
+  width: 34px; height: 46px; flex: none;
+  background: url("assets/ui/player_level/player_level_badge_frame.png") no-repeat center / contain;
+}
+.levelBadge span {
+  /* the frame's circle is centered at (48%, 49%) of the sprite — measured
+     from the art's actual pixel bounds, not the nominal center */
+  position: absolute; top: 49%; left: 48%; transform: translate(-50%, -50%);
+  font-weight: bold; font-size: 14px; color: #ffe9b0; text-shadow: 0 1px 2px #000;
+}
+.levelBadge.big { width: 46px; height: 62px; }
+.levelBadge.big span { font-size: 19px; }
+.levelBar {
+  position: relative; display: inline-block;
+  aspect-ratio: 480 / 110;
+  background: url("assets/ui/player_level/player_level_progress_bar_empty.png") no-repeat center / 100% 100%;
+}
+.levelBarFill {
+  /* full-size filled layer clipped by progress — no stretching, caps intact */
+  position: absolute; inset: 0;
+  background: url("assets/ui/player_level/player_level_progress_bar_filled.png") no-repeat center / 100% 100%;
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path .3s ease;
+}
+.levelBarText {
+  /* the sprite's inner channel spans x 8.1%–84.4%, y 47.3%–80.9% (measured
+     from pixels) — the box matches it so flex-centering lands dead center */
+  position: absolute; inset: 47% 15.6% 19% 8.1%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: bold; color: #fff; text-shadow: 0 1px 2px #000, 0 0 4px #000;
+}
+/* HUD placement: under the castle health bar — deliberately secondary, ~70% of
+   its width and shorter; the badge alone carries the level number */
+#levelBarWrap {
+  pointer-events: auto; cursor: pointer;
+  display: flex; align-items: center; gap: 4px;
+  background: none; border: none; padding: 0; margin: 0;
+  width: min(172px, 20vw);
+  /* deliberately unfiltered: this is the in-combat instance, and its fill
+     clip-path animates on every level-up — a filtered ancestor would re-raster
+     an offscreen surface for each frame of that animation (same rule as
+     .abIco above). The menu instance keeps its shadow. */
+}
+#levelBarWrap .levelBadge { width: 22px; height: 29px; }
+#levelBarWrap .levelBadge span { font-size: 10px; }
+#hudLevelBar { flex: 1; }
+#hudLevelBar .levelBarText { display: none; }
+/* menu placement */
+#playerLevelWrap {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  margin-top: 10px; cursor: pointer;
+}
+.levelBarOuter { display: flex; flex-direction: column; align-items: stretch; width: min(230px, 46vw); }
+#menuLevelBar { width: 100%; }
+/* level rewards list: scrolls (20 bonus rows), title/subtext/Back stay pinned */
+#levelRewardsScreen .panel { display: flex; flex-direction: column; overflow: hidden; max-height: var(--panel-max-h); }
+#levelRewardsScreen .panel h2, #levelRewardsScreen .subtext, #btnLevelRewardsBack { flex: 0 0 auto; }
+#btnLevelRewardsBack { align-self: center; }
+#levelRewardsList { display: flex; flex-direction: column; gap: 6px; text-align: left; max-width: 420px; margin: 0 auto; overflow-y: auto; min-height: 0; overscroll-behavior: contain; width: 100%; }
+.lvlRewardItem {
+  display: flex; align-items: center; gap: 10px;
+  background: linear-gradient(180deg, rgba(38,52,79,.85), rgba(17,24,38,.9));
+  border: 2px solid #6f7887; border-radius: 10px; padding: 6px 12px;
+}
+.lvlRewardItem.done { opacity: .55; }
+.lvlRewardItem.current { border-color: #ffd77a; box-shadow: 0 0 10px rgba(255,215,122,.35); }
+.lvlRewardStar { width: 30px; height: 30px; object-fit: contain; flex: none; }
+.lvlRewardBody { flex: 1; }
+.lvlRewardLvl { font-weight: bold; color: #ffe9b0; font-size: 14px; }
+.lvlRewardCoins { font-size: 12px; color: #cbb98f; }
+.lvlRewardState { font-size: 13px; color: #7ed957; flex: none; }
+
+/* recruit-assignment badge on room cards */
+.recruitBadge {
+  margin-left: 6px; font-size: 11px; color: #7ad9ff;
+  background: rgba(60,120,200,.25); border: 1px solid rgba(122,217,255,.5);
+  border-radius: 8px; padding: 0 5px; white-space: nowrap;
+}
+#btnNextWave {
+  margin-top: 0;
+  min-width: min(100%, 280px);
+}
+
+/* ============ Meta shop ============ */
+#metaList { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 270px), 1fr)); gap: var(--ui-gap); text-align: left; }
+.metaItem {
+  background: linear-gradient(180deg, rgba(38,52,79,.85), rgba(17,24,38,.9));
+  border: 2px solid #6f7887; border-radius: 12px;
+  padding: 10px 12px; display: flex; gap: 13px; align-items: center; min-width: 0;
+}
+.metaItem .mIcon {
+  font-size: 30px;
+  width: 52px; height: 52px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.metaItem .mIcon img {
+  width: 100%; height: 100%; object-fit: contain;
+  filter: drop-shadow(0 3px 4px rgba(0,0,0,.55));
+  user-select: none; -webkit-user-drag: none;
+}
+.metaItem .mIcon.narrow img { width: 40px; }   /* banner standards read better slim */
+.metaItem .mBody { flex: 1; }
+.metaItem .roomBtn { flex-shrink: 0; }
+.metaItem .mName { font-weight: bold; color: #ffe9b0; }
+.metaItem .mDesc { font-size: 12.5px; color: #cbb98f; line-height: 1.3; }
+.metaItem.owned { border-color: #4d8a3a; }
+.metaItem.owned .mName::after { content: " ✓"; color: #7ed957; }
+
+/* ============ Misc ============ */
+.toggleRow {
+  display: flex; align-items: center; gap: 10px; font-size: 17px;
+  padding: 10px 6px; cursor: pointer; text-align: left;
+}
+/* wrappers exist so short landscape screens can regrid the settings panel;
+   everywhere else they must not affect layout at all */
+.settingsGrid, .settingsBtnRow { display: contents; }
+
+/* ---- How to Play › Tutorials ----
+   A matched pair: one grid, equal tracks and a stretched row, so the two
+   tutorial buttons always share the same width and height whatever their
+   labels do. Same font, same hover/press states as every other .bigBtn in
+   the panel — they read as one group, not as new controls. The icon slot is
+   a fixed box with object-fit: contain, so the square Castle Fling icon and
+   the wide Castle Ricochet logo both keep their aspect ratio and neither is
+   cropped, stretched or faded. */
+.tutorialGroup { margin-top: var(--ui-gap); flex: 0 0 auto; }
+.sectionHead {
+  color: #ffd77a; font-size: 1.05em; margin: 0 0 2px;
+  border-bottom: 1px solid #4a5468; padding-bottom: 3px;
+  text-shadow: 0 1px 2px #000; text-align: left;
+}
+.tutorialBtnRow {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px; align-items: stretch;
+}
+.tutorialBtnRow .bigBtn.small {
+  margin-top: 0; width: 100%; min-width: 0;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  padding-left: calc(12px * var(--ui-scale)); padding-right: calc(12px * var(--ui-scale));
+}
+/* the label may shorten to a confirmation — the button must not resize */
+.tutorialBtnRow .btnLabel { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.tutIcoSlot {
+  flex: none; width: 34px; height: 26px;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.tutIcoSlot img {
+  max-width: 100%; max-height: 100%;
+  width: auto; height: auto; object-fit: contain;
+  filter: drop-shadow(0 2px 2px rgba(0,0,0,.5));
+}
+/* Three tutorials, one system: on compact landscape the third button sits
+   centered below the first two at the same width as one column; on wide
+   screens all three share a single row of equal tracks. Every button keeps
+   the same sprite, height, font and press states — none reads as secondary. */
+.tutorialBtnRow .bigBtn.small:nth-child(3):last-child {
+  grid-column: 1 / -1; justify-self: center; width: calc(50% - 5px);
+}
+@media (min-width: 980px) {
+  .tutorialBtnRow { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .tutorialBtnRow .bigBtn.small:nth-child(3):last-child {
+    grid-column: auto; justify-self: stretch; width: 100%;
+  }
+}
+/* narrow panels: stack rather than crush the labels */
+@media (max-width: 520px) {
+  .tutorialBtnRow { grid-template-columns: minmax(0, 1fr); }
+  .tutorialBtnRow .bigBtn.small:nth-child(3):last-child {
+    grid-column: auto; justify-self: stretch; width: 100%;
+  }
+}
+.toggleRow input { width: 22px; height: 22px; accent-color: #d9a838; cursor: pointer; }
+.sliderRow { justify-content: space-between; }
+.sliderRow input[type=range] {
+  flex: 1; max-width: 200px; height: 8px; margin-left: 12px;
+  accent-color: #d9a838; cursor: pointer;
+}
+
+/* the body is the scroller so the title and Back button stay pinned; the
+   Tutorials block rides INSIDE the scroller as its last child, so it is
+   reached at the end of the guide rather than sitting over it */
+#howtoScreen .panel { display: flex; flex-direction: column; overflow: hidden; }
+#howtoScreen .panel h2, #howtoScreen #btnHowToBack { flex: 0 0 auto; }
+/* the scroller is left-aligned prose; the Tutorials block keeps the panel's
+   centred treatment and gets a rule above it to read as its own section */
+#howtoScreen .howtoBody > .tutorialGroup {
+  text-align: center;
+  margin-top: 18px; padding-top: 12px;
+  border-top: 1px solid #4a5468;
+}
+#howtoScreen #btnHowToBack { align-self: center; }
+.howtoBody { text-align: left; font-size: 15px; line-height: 1.45; overflow-y: auto; min-height: 0; overscroll-behavior: contain; }
+.howtoBody p { margin: 8px 0; display: flex; align-items: flex-start; gap: 10px; }
+.howtoBody b { color: #ffe9b0; }
+.howtoHead {
+  color: #ffd77a; font-size: 1.1em; margin: 14px 0 2px;
+  border-bottom: 1px solid #4a5468; padding-bottom: 3px;
+  text-shadow: 0 1px 2px #000;
+}
+.howtoBody .howtoHead:first-child { margin-top: 0; }
+/* compact reward summaries inside the guide: same parchment ink and gold
+   heading as the sections around them, indented to the text column so the
+   icon gutter stays clean. Purely a text block — nothing here is focusable. */
+.howtoSummary {
+  margin: 6px 0 10px 46px; padding: 7px 12px;
+  background: rgba(18, 26, 44, .5); border: 1px solid #4a5468; border-radius: 8px;
+}
+.howtoSummary .sumTitle {
+  display: block; color: #ffd77a; font-size: .92em; letter-spacing: .03em;
+  text-transform: uppercase; text-shadow: 0 1px 2px #000; margin-bottom: 3px;
+}
+.howtoSummary ul { margin: 0; padding-left: 18px; }
+.howtoSummary li { margin: 2px 0; }
+/* the five restoration-stage medallions read as art, not as punctuation, so
+   they sit a little larger than a 1em currency glyph */
+.howtoStageIco { width: 1.7em; height: 1.7em; object-fit: contain; vertical-align: -0.5em; }
+
+.modCard {
+  background: rgba(60,25,15,.5); border: 2px solid #d97a5c; border-radius: 12px;
+  padding: 14px; margin: 10px 0; font-size: 16px; line-height: 1.4;
+}
+.modCard .modName { font-size: 20px; font-weight: bold; color: #ffb27a; display: block; margin-bottom: 6px; }
+.rowBtns { display: flex; gap: 12px; justify-content: center; }
+
+/* stacked action buttons on pause & game-over panels: full width, even spacing */
+#pauseScreen .bigBtn, #gameoverScreen .bigBtn { width: 100%; margin-top: 12px; }
+/* pause: wider panel + two-column grid so all five actions fit on one screen */
+#pauseScreen .panel { max-width: min(var(--panel-max-w), 620px); width: 100%; }
+.pauseBtns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+.pauseBtns .bigBtn { margin-top: 0; }
+.pauseBtns .span2 { grid-column: 1 / -1; }
+@media (max-height: 480px) {
+  .pauseBtns { gap: 7px; margin-top: 8px; }
+  #pauseScreen .panel { padding: 10px 18px; }
+}
+#gameoverScreen .panel { padding-bottom: 26px; min-width: min(88vw, 400px); }
+
+#goStats { text-align: left; display: inline-block; margin: 8px 0; font-size: 17px; line-height: 1.7; }
+#goStats b { color: #ffe9b0; }
+.crownAward { font-size: 24px; color: #ffd77a; margin: 12px 0; text-shadow: 0 0 14px rgba(255,205,90,.6); }
+
+/* ============ Themed confirm modal (replaces OS confirm()) ============ */
+#confirmModal {
+  position: absolute; inset: 0; z-index: var(--z-confirm, 60);
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(6, 9, 15, .66);
+  padding: var(--screen-pad-y) var(--screen-pad-x);
+}
+#confirmModal .panel { max-width: min(88vw, 440px); }
+#confirmTitle { color: #ffe9b0; font-size: calc(21px * var(--ui-scale)); margin: 0 0 8px; text-shadow: 0 2px 3px #000; }
+#confirmMsg { color: #e8dcc0; font-size: calc(16px * var(--ui-scale)); line-height: 1.45; margin: 0; }
+.confirmBtns { display: flex; gap: 12px; justify-content: center; margin-top: calc(16px * var(--ui-scale)); flex-wrap: wrap; }
+.confirmBtns .bigBtn.small { margin-top: 0; min-width: 128px; }
+
+/* ---- landscape gate (portrait / narrow window) ----
+   Covers every screen and modal so a squashed layout is never reachable, and
+   insets itself on all four sides so the message clears a cutout or the
+   navigation bar in any rotation. The card is the standard menu .panel — only
+   the layout here is new. */
+#rotateGate {
+  position: fixed; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  padding: max(14px, var(--safe-top)) max(14px, var(--safe-right))
+           max(14px, var(--safe-bottom)) max(14px, var(--safe-left));
+  background: radial-gradient(ellipse at center, #1d1913 0%, #0c0a08 100%);
+  z-index: var(--z-rotate-gate, 2000);
+  overflow-y: auto;
+}
+#rotateGate .panel { max-width: min(420px, 100%); margin: auto; text-align: center; }
+.rotateGateLogo { display: block; width: min(68%, 232px); margin: 0 auto 10px; object-fit: contain; }
+.rotateGateIcon { font-size: calc(32px * var(--ui-scale)); line-height: 1; margin-bottom: 6px; }
+#rotateGate h3 { color: #ffe9b0; font-size: calc(20px * var(--ui-scale)); margin: 0 0 8px; text-shadow: 0 2px 3px #000; }
+#rotateGate p { color: #e8dcc0; font-size: calc(15px * var(--ui-scale)); line-height: 1.45; margin: 0; }
+#rotateGate .rotateGateNote { color: #b9ad92; font-size: calc(13px * var(--ui-scale)); margin-top: 8px; }
+
+/* Scrollbars inside panels */
+.panel::-webkit-scrollbar { width: 8px; }
+.panel::-webkit-scrollbar-thumb { background: #4a5468; border-radius: 4px; }
+
+/* ============ Coin shop ============ */
+#shopBanner {
+  background: linear-gradient(90deg, rgba(217,168,56,.18), rgba(255,224,130,.32), rgba(217,168,56,.18));
+  border: 1.5px solid #d9a838; border-radius: 10px;
+  color: #ffe9b0; font-weight: bold; font-size: calc(16px * var(--ui-scale));
+  padding: 8px 12px; margin-bottom: var(--ui-gap);
+  text-shadow: 0 1px 2px #000;
+}
+#shopStatus { min-height: 1.3em; }
+#shopList { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr)); gap: var(--ui-gap); text-align: left; margin: var(--ui-gap) 0; }
+.shopItem {
+  display: flex; align-items: center; gap: 12px;
+  background: linear-gradient(180deg, rgba(38,52,79,.85), rgba(17,24,38,.9));
+  border: 2px solid #6f7887; border-radius: 12px;
+  padding: 10px 14px;
+}
+.shopIco { width: 52px; height: 52px; object-fit: contain; flex: none; filter: drop-shadow(0 3px 4px rgba(0,0,0,.55)); }
+.shopBody { flex: 1; min-width: 0; }
+.shopCoins { font-size: calc(19px * var(--ui-scale)); font-weight: bold; color: #ffe9b0; }
+.shopSub { font-size: 12px; color: #9fb0c8; }
+.shopBuy { min-width: 84px; }
+.legalFootnote { margin-top: 10px; font-size: 12px; color: #8494ac; }
+.legalFootnote a { color: #a8c0e8; }
+
+/* ============ Terms & privacy ============ */
+.legalSection { text-align: left; margin-bottom: 14px; }
+.legalSection h3 { color: #ffe9b0; font-size: calc(17px * var(--ui-scale)); margin-bottom: 4px; }
+.legalSection p { font-size: calc(13.5px * var(--ui-scale)); line-height: 1.45; color: #cdd7e6; }
+
+/* ============ Upgrade limit panel ============ */
+.counterText { color: #9fd8b0; }
+.noUpgradeMsg { font-size: calc(17px * var(--ui-scale)); color: #ffb27a; margin: 12px 0; text-shadow: 0 1px 2px #000; }
+#noUpgradePanel .rowBtns { margin-top: 6px; }
+
+/* ============ Dev mock ad overlay ============ */
+.mockAdOverlay {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(6, 8, 12, .92);
+  display: flex; align-items: center; justify-content: center;
+}
+.mockAdBox {
+  background: linear-gradient(180deg, #33415c, #131a29);
+  border: 3px solid #9aa3b2; border-radius: 14px;
+  padding: 26px 40px; text-align: center; color: #f0e6d2;
+  font-family: Georgia, serif;
+}
+.mockAdTag { font-size: 14px; letter-spacing: 2px; color: #8494ac; margin-bottom: 10px; }
+.mockAdTimer { font-size: 20px; font-weight: bold; color: #ffe9b0; margin-bottom: 12px; }
+.mockAdSkip {
+  font-family: inherit; font-size: 14px; padding: 8px 16px; cursor: pointer;
+  background: linear-gradient(180deg,#3d5580,#1b2740); border: 2px solid #9aa3b2;
+  border-radius: 8px; color: #f0e6d2; min-height: 40px;
+}
+
+/* ============ Scroll hint ============ */
+/* One shared pill for every scrolling menu (Milestones and Level Rewards
+   included), so the two reward menus look and behave identically. It is
+   painted live by paintScrollHint(): shown while content remains below the
+   fold, hidden at the bottom of the list. */
+.scrollHint {
+  position: absolute; left: 50%; transform: translateX(-50%); bottom: 4px;
+  font-size: 11px; color: #cdd7e6; background: rgba(15,20,32,.85);
+  border: 1px solid #4a5468; border-radius: 8px; padding: 2px 10px;
+  pointer-events: none; z-index: 5;
+  white-space: nowrap; max-width: calc(100% - 16px);
+}
+/* the pill's reserved lane at the END of the scrolled content: the last
+   reward row can then never sit underneath it. A trailing spacer rather than
+   padding, so it adds to whatever padding the scroller already has instead of
+   replacing it, and a full-width block so it behaves in a block scroller, a
+   flex column (#milestoneList / #levelRewardsList) and a wrapping flex row
+   (.cardRow) alike. Added while the pill is MOUNTED (the scroller overflows),
+   never toggled with its visibility, so the scroller's geometry is constant
+   and showing/hiding the pill cannot oscillate. */
+.scrollHintPad::after {
+  content: ''; display: block; flex: 0 0 auto;
+  width: 100%; height: 26px; pointer-events: none;
+}
+
+/* ============ Mobile tweaks ============ */
+@media (max-width: 720px) {
+  :root {
+    --ui-gap: calc(10px * var(--ui-scale));
+    --screen-pad-x: max(10px, var(--safe-left), var(--safe-right));
+    --screen-pad-y: max(10px, var(--safe-top), var(--safe-bottom));
+    --panel-max-h: calc(100dvh - var(--safe-top) - var(--safe-bottom) - 18px);
+    --panel-max-w: calc(100vw - var(--safe-left) - var(--safe-right) - 18px);
+  }
+  #hud { font-size: calc(14px * var(--ui-scale)); }
+  .resource { font-size: 14px; padding: 2px 9px; }
+  #hudTopCenter { top: max(52px, calc(var(--safe-top) + 46px)); max-width: 42%; }
+  #waveLabel { font-size: calc(18px * var(--ui-scale)); }
+  .pickCard { width: 150px; min-height: 165px; }
+  .pickCard .cardIcon { font-size: 32px; }
+  .pickCard .cardName { font-size: 15px; }
+  .menuPanel { padding: 22px 26px; }
+  #upgradeChips { max-width: 190px; }
+  .chip { font-size: 10.5px; }
+  .panel, .menuPanel { outline-offset: -5px; }
+  .panel.wide { max-width: var(--panel-max-w); }
+  #roomList { grid-template-columns: 1fr; }
+  #defAssign { justify-content: stretch; }
+  .assignRow { flex: 1 1 180px; justify-content: center; }
+  .rowBtns { flex-direction: column; }
+  .metaItem { align-items: flex-start; flex-wrap: wrap; }
+  .metaItem .mBody { flex-basis: calc(100% - 70px); }
+  .metaItem .roomBtn { margin-left: 65px; min-width: 120px; }
+}
+
+/* the upgrade-choice screen always keeps its Skip footer on-screen:
+   header + scrollable card row + pinned footer */
+#cardScreen .panel {
+  display: flex; flex-direction: column;
+  max-height: var(--panel-max-h);
+  overflow: hidden;
+}
+#cardScreen .cardRow { min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
+#cardScreen #btnSkipCard { flex: 0 0 auto; align-self: flex-start; }
+
+/* ============ Compact-height landscape: mid tier ============
+   Real mobile landscape viewports run ~640–800 CSS px tall (S20 FE-class
+   WebViews report ~700–710), a range the tiers below this one never touched:
+   full-size layouts overflowed and panels fell back to internal scrolling
+   (clipped Terms line, Board content scrolling under its footer). This tier
+   trims decorative height FIRST — logo, gaps, margins — and type only
+   slightly, leaving generous slack for devices whose text renders taller
+   than desktop Georgia. The stronger 620/560/480/380 tiers follow later in
+   the file, so they still win on shorter screens. */
+@media (orientation: landscape) and (max-height: 800px) {
+  /* --- main menu: reserve the bottom of the panel for level bar + legal --- */
+  #menuScreen .menuPanel { padding: 16px 36px 18px; }
+  #logoImg { width: min(460px, 50dvh, 78vw); }
+  .menuActions { gap: 10px; }
+  .menuButtons { gap: 10px; }
+  #menuScreen #playerLevelWrap { margin-top: 6px; }
+  #menuScreen #menuBest { margin-top: 6px; font-size: 13px; }
+  #menuScreen .legalFootnote { margin-top: 5px; font-size: 11.5px; }
+  /* --- castle select: shave the card body so title + grid + Back fit --- */
+  #castleScreen h2 { margin-bottom: 8px; }
+  #castleList { gap: 10px; }
+  #castleList .pickCard { padding: 10px 10px; gap: 6px; }
+  #castleList .cardArt { height: clamp(56px, 11dvh, 84px); }
+  #castleScreen #btnCastleBack { margin-top: 8px; }
+}
+
+@media (max-height: 620px) {
+  #logoImg { width: min(400px, 74vw); }
+  .pickCard { min-height: 150px; padding: 10px; }
+  .cardArt { height: 66px; }
+  .bigBtn { min-height: 46px; }
+  #goStats { line-height: 1.45; }
+
+  /* --- main menu on any short landscape height ---
+     Decorative height goes first (logo, gaps), then the controls
+     tighten a little. Everything stays on screen with no page scrolling and
+     no whole-menu transform. Shorter screens tighten further below. */
+  #menuScreen .menuPanel { max-width: min(var(--panel-max-w), 620px); padding: 12px 26px 14px; }
+  #logoImg { width: min(400px, 44dvh, 74vw); }
+  .menuActions { gap: 8px; }
+  .menuButtons { gap: 8px; }
+  #menuScreen .bigBtn { min-height: 44px; font-size: 16px; padding: 8px 18px; }
+  /* half-width buttons get narrower as the panel tightens — keep the longest
+     label ("Continue Run (wave 99)") on one line and unclipped */
+  #menuScreen .menuButtons > .bigBtn { font-size: calc(14px * var(--ui-scale)); padding-left: 10px; padding-right: 10px; }
+  #menuScreen .btnIco { width: 24px; height: 24px; }
+  #menuScreen .menuButtons > .bigBtn .btnIco { width: 20px; height: 20px; }
+  .menuIconRow { --ico-bleed: clamp(0px, 1.2vw, 12px); }   /* panel padding is 26px here */
+  .menuIcoBtn { --ico-slot: clamp(48px, 12dvh, 64px); --ico-w: clamp(50px, 12.5dvh, 66px); }
+  .menuIcoBtn--board { --ico-w: clamp(78px, 19dvh, 104px); }
+  .menuIcoBtn--rico { --ico-w: clamp(88px, 21dvh, 120px); }
+  #menuScreen #playerLevelWrap { margin-top: 6px; }
+  #menuBest { margin-top: 6px; font-size: 12px; }
+}
+
+/* short landscape screens (phones in the intended play orientation):
+   everything tightens so full panels fit without scrolling */
+@media (max-height: 480px) {
+  #logoImg { width: min(330px, 40dvh, 68vw); }
+  .menuPanel { padding: 8px 22px 10px; }
+  .menuButtons { gap: 5px; }
+  .bigBtn { min-height: 40px; font-size: 15px; padding: 6px 18px; }
+  .bigBtn.small { min-height: 36px; font-size: 13px; padding: 5px 14px; margin-top: 6px; }
+  .btnIco { width: 22px; height: 22px; }
+  #menuBest { margin-top: 8px; font-size: 11px; }
+  h2 { font-size: 18px; margin-bottom: 6px; }
+  h3 { font-size: 14px; margin: 4px 0; }
+  .subtext { font-size: 11px; margin-bottom: 4px; }
+  .panel, .menuPanel { padding: 10px 16px; }
+  .pickCard { width: clamp(128px, 26vw, 165px); min-height: 0; padding: 8px 6px; gap: 4px; }
+  .cardArt { height: clamp(40px, 16dvh, 60px); }
+  .pickCard .cardIcon { font-size: 26px; }
+  .pickCard .cardName { font-size: 13px; }
+  .pickCard .cardDesc { font-size: 10.5px; line-height: 1.25; }
+  .pickCard .cardLvl { font-size: 10px; }
+  .cardRow { gap: 8px; margin: 6px 0; }
+  .roomCard { padding: 6px 8px; gap: 3px; }
+  .roomArt { width: 42px; height: 46px; }
+  .roomCard .roomDesc { min-height: 0; font-size: 11px; }
+  .roomBtn { min-height: 36px; font-size: 13px; padding: 5px 10px; }
+  #goStats { font-size: 13px; line-height: 1.35; }
+  .crownAward { font-size: 17px; margin: 6px 0; }
+  .toggleRow { padding: 5px 4px; font-size: 14px; }
+  .howtoBody { font-size: 12px; line-height: 1.3; }
+  .howtoIco { width: 26px; height: 26px; }
+  .howtoEmoji { font-size: 19px; }
+  .howtoSummary { margin-left: 36px; padding: 5px 9px; }
+  .howtoSummary ul { padding-left: 15px; }
+  .sigilIco { width: 24px; height: 24px; }
+  #goBanner { width: min(60%, 220px); margin-bottom: 3px; }
+  .doomTitle.goSub { font-size: 14px; margin-bottom: 5px; }
+  .rowIco { width: 28px; height: 28px; }
+  .modIcon { width: 44px; height: 44px; margin-bottom: 3px; }
+  .hIco { width: 24px; height: 24px; vertical-align: -6px; }
+  .modCard { font-size: 13px; padding: 8px; margin: 6px 0; }
+  #defenderPanel { margin-top: 6px; padding-top: 4px; }
+
+  /* --- main menu: fit on one screen — wider panel, tighter action group ---
+     Vertical gaps and decorative spacing give way before the controls do:
+     the primary grid stays 2×2 and the icon row stays on one line. */
+  .menuPanel { max-width: min(94vw, 620px); max-width: min(var(--panel-max-w), 620px); width: 100%; }
+  .menuActions { gap: 7px; }
+  .menuButtons { gap: 6px; }
+  .menuIconRow { gap: clamp(5px, 1.2vw, 12px); }
+  .menuIcoBtn { --ico-slot: clamp(46px, 11.5dvh, 62px); --ico-w: clamp(48px, 12dvh, 64px); }
+  .menuIcoBtn--board { --ico-w: clamp(74px, 18dvh, 100px); }
+  .menuIcoBtn--rico { --ico-w: clamp(84px, 20dvh, 116px); }
+  #logoImg { width: min(330px, 40dvh, 68vw); }
+  #playerLevelWrap { margin-top: 0; gap: 6px; }
+  #playerLevelWrap .levelBadge.big { width: 28px; height: 37px; }
+  #playerLevelWrap .levelBadge.big span { font-size: 12px; }
+  .levelBarOuter { width: min(180px, 38vw); }
+  #menuLevelBar .levelBarText { font-size: 9px; }
+  #menuBest { margin-top: 4px; }
+  .legalFootnote { margin-top: 4px; font-size: 11px; }
+
+  /* --- crown shop: fit on one screen — tighter rows, banner and footer --- */
+  #shopScreen h2 { font-size: 17px; margin-bottom: 4px; }
+  #shopScreen .hIco { width: 20px; height: 20px; vertical-align: -4px; }
+  #shopBanner { padding: 4px 10px; font-size: 13px; margin-bottom: 4px; }
+  #shopAdNote { font-size: 10.5px; margin-bottom: 2px; }
+  #shopStatus:empty { display: none; }
+  #shopStatus { min-height: 0; }
+  #shopList { margin: 4px 0; gap: 6px; }
+  .shopItem { padding: 4px 10px; gap: 8px; }
+  .shopIco { width: 36px; height: 36px; }
+  .shopCoins { font-size: 15px; }
+  .shopSub { font-size: 10.5px; }
+  .shopBuy { min-width: 76px; }
+  #shopScreen .rowBtns { margin-top: 4px; gap: 8px; }
+  #shopScreen .rowBtns .bigBtn.small { margin-top: 0; min-height: 32px; font-size: 12px; padding: 3px 12px; }
+  #shopScreen .legalFootnote { margin-top: 3px; font-size: 10px; }
+  #shopScreen .panel { padding: 8px 14px; }
+
+  /* --- settings: fit on one screen — two toggle columns + one button row --- */
+  #settingsScreen .panel { max-width: min(94vw, 760px); max-width: min(var(--panel-max-w), 760px); width: 100%; }
+  .settingsGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 26px; }
+  .settingsGrid .toggleRow { padding: 4px 2px; }
+  .settingsBtnRow { display: flex; gap: 10px; justify-content: center; margin-top: 8px; flex-wrap: wrap; }
+  .settingsBtnRow .bigBtn.small { margin-top: 0; }
+  /* the tutorial pair stays a two-up row on short landscape screens */
+  .tutorialGroup { margin-top: 6px; }
+  .sectionHead { font-size: 13px; margin-bottom: 1px; padding-bottom: 2px; }
+  .tutorialBtnRow { gap: 8px; }
+  .tutorialBtnRow .bigBtn.small { font-size: 13px; padding: 4px 10px; min-height: 34px; }
+  .tutIcoSlot { width: 26px; height: 20px; }
+
+  /* --- castle rooms: all six on one screen — three columns, tighter cards --- */
+  /* adaptive columns: 3-up on regular phones, 2-up on narrow screens so cards
+     are never crushed; the body scrolls and the footer stays pinned */
+  #roomList { grid-template-columns: repeat(auto-fit, minmax(172px, 1fr)); gap: 3px; }
+  #buildScreen .actionFooter { gap: 6px; }
+  #buildScreen .actionFooter .bigBtn.small { min-height: 32px; font-size: 12px; padding: 3px 10px; }
+  #buildScreen .actionFooter .bigBtn.gold { min-height: 36px; font-size: 14px; }
+  #buildScreen .panel { padding: 6px 12px; }
+  #buildScreen h2 { margin-bottom: 3px; }
+  #buildScreen .roomCard { padding: 2px 7px; gap: 2px; }
+  #buildScreen .roomDesc { font-size: 9.5px; line-height: 1.15; }
+  #buildScreen .roomBody { gap: 6px; }
+  #buildScreen .roomArt { width: 32px; height: 36px; }
+  #buildScreen .roomName { font-size: 12.5px; }
+  #buildScreen .pips { font-size: 10px; }
+  #buildScreen .roomDesc { font-size: 10px; line-height: 1.2; }
+  #buildScreen .roomBtn { min-height: 26px; font-size: 12px; padding: 2px 8px; }
+  #buildScreen h2 { font-size: 16px; }
+  #buildScreen .panelFooter { padding-top: 4px; }
+  #buildScreen .panelFooter .bigBtn { min-height: 36px; }
+  #buildScreen .assignRow { min-height: 30px; padding: 1px 6px; flex: 0 1 auto; font-size: 12px; gap: 5px; }
+  #buildScreen .assignRow button { width: 28px; height: 28px; font-size: 14px; }
+  /* recruits strip goes horizontal: title and assign rows share one line */
+  #defenderPanel { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 4px 10px; padding-top: 1px; }
+  #defenderPanel h3 { font-size: 12px; margin: 0; }
+  #defenderPanel #defAssign { gap: 6px; }
+  .buildPanelBody { gap: 3px; }
+  #buildScreen .roomDesc { line-height: 1.15; }
+}
+
+/* ultra-short screens (Galaxy J7-class 360px): drop the stats line from the
+   menu; Terms & Privacy must stay visible, so it shrinks instead */
+@media (max-height: 380px) {
+  #menuBest { display: none; }
+  #menuScreen .legalFootnote { margin-top: 2px; font-size: 10.5px; }
+  #menuScreen .bigBtn { min-height: 37px; font-size: 14px; }
+  #logoImg { width: min(280px, 36dvh, 62vw); }
+  .menuActions { gap: 5px; }
+  .menuIconRow { gap: 5px; --ico-bleed: 0px; }
+  /* smallest supported landscape: icons shrink to their floor rather than
+     wrapping the row or pushing the countdown off the panel */
+  .menuIcoBtn { --ico-slot: 44px; --ico-w: 46px; }
+  .menuIcoBtn--board { --ico-w: 72px; }
+  .menuIcoBtn--rico { --ico-w: 82px; }
+  .menuIcoBtn--rico .menuIcoBtn__timer { font-size: 9px; }
+}
+
+@media (pointer: coarse) and (max-height: 480px) {
+  .bigBtn { min-height: 42px; }
+  .roomBtn { min-height: 40px; }
+}
+
+@media (pointer: coarse) {
+  .bigBtn { min-height: 50px; }
+  .menuIcoBtn { min-width: 48px; min-height: 48px; }
+  .roomBtn { min-height: 44px; }
+  .assignRow button { width: 42px; height: 42px; }
+  #abilityBar { bottom: max(12px, calc(var(--safe-bottom) + 14px)); }
+}
+
+/* mobile ability buttons: half the desktop footprint so they stop
+   dominating the battlefield; hit target stays the full button box */
+html.is-mobile .abilityBtn {
+  width: 32px; height: 32px; border-radius: 8px; border-width: 2px;
+  font-size: 14px;
+}
+html.is-mobile .abilityBtn .abIco { width: 21px; height: 21px; }
+html.is-mobile .abilityBtn .keyHint { display: none; }
+html.is-mobile #abilityBar { gap: 7px; }
+
+/* ============ CASTLE RICOCHET ============ */
+/* countdown line under the menu logo: goes gold when a free run is ready */
+#ricochetStatus.ricoReady { color: #ffd24a; text-shadow: 0 0 8px rgba(255, 210, 74, .45); }
+
+/* result screen — must fit landscape phones WITHOUT scrolling: both art
+   pieces clamp against viewport height (vh fallback, dvh where supported)
+   and a short-screen compact mode tightens text/padding further */
+.ricoResultPanel { text-align: center; max-width: 460px; }
+#ricoResultReason { color: #ff9d88; font-weight: bold; letter-spacing: .04em; margin: 2px 0 4px; }
+.ricoBanner {
+  display: block; margin: -8px auto 2px; width: min(300px, 70%); height: auto;
+  max-height: 30vh; max-height: 30dvh; object-fit: contain;
+}
+.ricoBadge {
+  display: block; margin: 4px auto; width: 110px; height: auto;
+  max-height: 18vh; max-height: 18dvh; object-fit: contain;
+}
+.ricoCoins {
+  font-size: 24px; font-weight: bold; color: #ffd24a;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, .6); margin: 4px 0 2px;
+}
+#ricoResultNext { margin-bottom: 6px; }
+/* short screens (landscape phones): compress every non-essential pixel so the
+   full stack — banner, title, badge, coins, stats, buttons — fits on screen */
+@media (max-height: 560px) {
+  .ricoResultPanel { padding: 10px 20px 12px; }
+  .ricoResultPanel h2 { font-size: 20px; margin-bottom: 4px; }
+  .ricoBanner { margin: -4px auto 0; max-height: 24vh; max-height: 24dvh; }
+  .ricoBadge { margin: 2px auto; max-height: 15vh; max-height: 15dvh; }
+  .ricoCoins { font-size: 20px; margin: 2px 0; }
+  .ricoResultPanel .subtext { font-size: 12.5px; margin-bottom: 2px; }
+  /* stats share one line instead of stacking */
+  #ricoResultShots, #ricoResultNext { display: inline-block; margin: 0 7px 2px; }
+  .ricoResultPanel .rowBtns { margin-top: 6px; gap: 10px; }
+  .ricoResultPanel .rowBtns .bigBtn { min-height: 40px; font-size: 14px; padding: 6px 14px; }
+}
+
+/* Castle Ricochet: the classic game hides the OS cursor (it draws a giant
+   hand instead) — this mode has no hand, so the cursor must come back */
+#game.ricoCursor { cursor: crosshair; }
+
+/* ============ MENU UI THEME PACK (lower-layer reskin) ============
+   Blue-stone / silver / gold sprite backgrounds from assets/ui/theme/.
+   These overrides swap ONLY the painted lower layer (gradients, borders,
+   outlines) for nine-sliced sprites. Every layout-bearing property —
+   size, padding, border-width, margins, hitboxes — is inherited from the
+   base rules above and must stay untouched. Bump ?tv= when any theme
+   sprite changes so WebView caches refresh. */
+
+/* ---- panels ---- */
+.panel {
+  background: none;
+  outline-color: transparent;
+  box-shadow: 0 10px 40px rgba(0,0,0,.75);
+  border-image: url("assets/ui/theme/ui_panel_pause_settings.png?tv=6") 46 fill / 20px stretch;
+}
+.panel.wide, .menuPanel {
+  background: none;
+  outline-color: transparent;
+  box-shadow: 0 10px 40px rgba(0,0,0,.75);
+  border-image: url("assets/ui/theme/ui_panel_main_menu_large.png?tv=6") 46 fill / 20px stretch;
+}
+/* (the base .menuPanel rule no longer sets backdrop-filter at all) */
+#confirmModal .panel {
+  border-image: url("assets/ui/theme/ui_modal_confirmation.png?tv=6") 46 fill / 18px stretch;
+}
+/* upgrade-choice screen: originally frameless (noBg), now carries the
+   large panel so the wave-cleared menu reads as a real panel again */
+.panel.noBg {
+  background: none;
+  box-shadow: 0 10px 40px rgba(0,0,0,.75);
+  border-image: url("assets/ui/theme/ui_panel_main_menu_large.png?tv=6") 46 fill / 20px stretch;
+}
+
+/* ---- big buttons ---- */
+.bigBtn {
+  background: none;
+  box-shadow: 0 4px 10px rgba(0,0,0,.55);
+  border-image: url("assets/ui/theme/ui_button_secondary_long.png?tv=6") 26 fill / 14px stretch;
+}
+.bigBtn:hover { filter: brightness(1.08); box-shadow: 0 6px 14px rgba(0,0,0,.6); }
+.bigBtn:active { filter: brightness(.96); }
+.bigBtn.gold {
+  background: none;
+  border-image: url("assets/ui/theme/ui_button_primary_long.png?tv=6") 26 fill / 14px stretch;
+}
+.bigBtn.danger {
+  background: none;
+  border-image: url("assets/ui/theme/ui_button_red.png?tv=6") 26 fill / 14px stretch;
+}
+.bigBtn.ghost { border-image: none; background: transparent; filter: none; }
+
+/* ---- room / shop / claim buttons (gold action buttons) ---- */
+.roomBtn {
+  background: none;
+  border-image: url("assets/ui/theme/ui_button_primary_long.png?tv=6") 26 fill / 10px stretch;
+}
+/* Locked / disabled: the plaque and the lock emblem are two separate assets,
+   never one nine-slice. The frame slices exactly like every other button in
+   the theme (uniform 26 → 10px, so only the grey middle body stretches or
+   shortens), and the lock rides on top as its own fixed-aspect element with
+   space reserved for it in the padding — so a short button can no longer
+   squash, slice or crop the emblem. The #buildScreen selector is only there
+   to out-specify that screen's compact padding shorthand. */
+.roomBtn:disabled,
+#buildScreen .roomBtn:disabled {
+  background: none;
+  border-image: url("assets/ui/theme/ui_button_disabled_body.png?tv=6") 26 fill / 10px stretch;
+  color: #93a0b3;
+  position: relative;
+  padding-right: calc(1em + 8px);   /* the emblem's lane — never overlapped */
+}
+.roomBtn:disabled::after {
+  content: "";
+  position: absolute;
+  right: 5px; top: 50%;
+  width: 0.95em; height: 1.15em; margin-top: -0.575em;
+  background: url("assets/ui/theme/ui_lock_emblem.png?tv=6") no-repeat center / contain;
+  pointer-events: none;
+}
+
+/* ---- cards, list rows, containers ---- */
+.pickCard, .roomCard, .milestoneItem, .metaItem, .shopItem, .lvlRewardItem, .assignRow {
+  background: none;
+  border-image: url("assets/ui/theme/ui_card_plain.png?tv=6") 24 fill / 12px stretch;
+}
+.pickCard { outline-color: transparent; }
+.pickCard:hover, .pickCard:active { outline-color: transparent; filter: brightness(1.07); }
+.pickCard.selected { box-shadow: 0 0 20px rgba(126,217,87,.5); }
+.metaItem.owned { box-shadow: 0 0 10px rgba(126,217,87,.35); }
+.lvlRewardItem.current { box-shadow: 0 0 10px rgba(255,215,122,.35); }
+
+/* ---- currency / star / crown pills ---- */
+.resource {
+  background: none;
+  box-shadow: 0 2px 6px rgba(0,0,0,.4);
+  border-image: url("assets/ui/theme/ui_currency_star_crown_pill.png?tv=6") 52 54 fill / 14px 13px stretch;
+}
+
+/* ---- +/− recruit assignment controls (sprites carry the glyph;
+        the live button text stays in the DOM for a11y, drawn clear) ---- */
+.assignRow button {
+  background: none;
+  border-color: transparent;
+  color: transparent;
+  text-shadow: none;
+}
+.assignRow button[data-a="-"] { background: url("assets/ui/theme/ui_button_minus_square.png?tv=6") no-repeat center / 100% 100%; }
+.assignRow button[data-a="+"] { background: url("assets/ui/theme/ui_button_plus_square.png?tv=6") no-repeat center / 100% 100%; }
+
+/* ---- checkboxes (live inputs, sprite lower layer only) ---- */
+.toggleRow input[type=checkbox] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: url("assets/ui/theme/ui_checkbox_unchecked.png?tv=6") no-repeat center / 100% 100%;
+}
+.toggleRow input[type=checkbox]:checked { background-image: url("assets/ui/theme/ui_checkbox_checked_gold.png?tv=6"); }
+.toggleRow input[type=checkbox]:disabled:checked { background-image: url("assets/ui/theme/ui_checkbox_disabled_checked.png?tv=6"); }
+
+/* ---- music volume slider (live input; themed track + thumb) ----
+   The decorative row icon is dropped (user request) so the slider can span
+   the whole row. Track and knob are separate sprites drawn the way the pack
+   art is built: the pill is a horizontal nine-slice whose 14px caps are
+   painted 1:1 and whose middle is the only part that stretches, and the round
+   knob is drawn on the track pseudo-element's own line at a fixed aspect, so
+   it stays circular and never gets clipped by the input box. */
+.sliderRow .rowIco { display: none; }
+.sliderRow input[type=range] {
+  -webkit-appearance: none;
+  appearance: none;
+  max-width: none;
+  height: 26px;                 /* the knob overhangs the pill — give it room */
+  background: none;
+  cursor: pointer;
+}
+.sliderRow input[type=range]::-webkit-slider-runnable-track {
+  height: 20px;                 /* the pill sprite's native height */
+  background: none;
+  border: 0 solid transparent;
+  border-width: 0 14px;         /* == the sprite's cap width: caps never stretch */
+  border-image: url("assets/ui/theme/ui_volume_slider_track.png?tv=6") 0 14 fill / 0 14px stretch;
+}
+.sliderRow input[type=range]::-moz-range-track {
+  height: 20px;
+  background: none;
+  border: 0 solid transparent;
+  border-width: 0 14px;
+  border-image: url("assets/ui/theme/ui_volume_slider_track.png?tv=6") 0 14 fill / 0 14px stretch;
+}
+.sliderRow input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 26px; height: 26px;
+  margin-top: -3px;             /* centres the knob on the 20px pill */
+  background: url("assets/ui/theme/ui_volume_slider_knob.png?tv=6") no-repeat center / contain;
+  border: none;
+  filter: drop-shadow(0 2px 2px rgba(0,0,0,.5));
+  cursor: pointer;
+}
+.sliderRow input[type=range]::-moz-range-thumb {
+  width: 26px; height: 26px;
+  background: url("assets/ui/theme/ui_volume_slider_knob.png?tv=6") no-repeat center / contain;
+  border: none;
+  border-radius: 50%;
+  filter: drop-shadow(0 2px 2px rgba(0,0,0,.5));
+  cursor: pointer;
+}
+
+/* ---- section banner (shop) ---- */
+#shopBanner {
+  background: none;
+  border-color: transparent;
+  border-image: url("assets/ui/theme/ui_banner_section_header.png?tv=6") 26 60 fill / 13px 26px stretch;
+}
+
+/* ---- bottom action row container (rooms / legal footer) ----
+   The base rule only pads the top (the old look was an open strip under a
+   hairline); the container sprite needs matching bottom padding so the
+   buttons sit centred in the bar instead of flush with its lower trim. */
+.actionFooter {
+  border-top-color: transparent;
+  border-image: url("assets/ui/theme/ui_bottom_action_row_container.png?tv=6") 24 42 fill / 12px 21px stretch;
+  padding-bottom: var(--ui-gap);
+}
+@media (max-height: 480px) {
+  #buildScreen .actionFooter { padding-bottom: 4px; }
+}
+
+/* ---- dangerous-bargain warning plaque ---- */
+.modCard {
+  background: none;
+  border-color: transparent;
+  border-image: url("assets/ui/theme/ui_tutorial_warning_bar.png?tv=6") 24 30 fill / 12px 15px stretch;
+}
+
+/* (the old #rotateHint tooltip is gone — the landscape gate uses the themed
+   .panel sprite directly, so it needs no border-image override of its own) */
+
+/* ============ ADVENTURERS' BOARD (Royal Decrees · Daily Siege) ============
+   Same theme-pack language as the rest of the menus: nine-sliced sprite
+   panels/cards, gold primary buttons, live text only. */
+/* header (title + tabs) · content · footer — the footer is a real grid row,
+   never positioned over the content. The content row is the only one that
+   flexes, and it scrolls internally before it can ever reach the footer. */
+.boardPanel { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; overflow: hidden; }
+.boardTitleRow { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.boardTitleRow h2 { margin-bottom: 0; white-space: nowrap; }
+.boardMeta { display: flex; align-items: center; gap: 10px; }
+.sealPill { font-size: 15px; }
+.sealPill.sealPulse { animation: sealPulse .8s ease; }
+@keyframes sealPulse {
+  0% { transform: scale(1); filter: none; }
+  30% { transform: scale(1.18); filter: drop-shadow(0 0 10px rgba(255,215,122,.9)); }
+  100% { transform: scale(1); filter: none; }
+}
+.boardReset { font-size: 13px; color: #cbb98f; text-shadow: 0 1px 2px #000; white-space: nowrap; font-variant-numeric: tabular-nums; }
+/* ---- tabs: both tabs share ONE footprint; only the sprite + ink change
+        with selection, so switching never moves the shell ---- */
+.boardTabs { display: flex; gap: 10px; justify-content: center; margin-top: 8px; }
+.tabBtn {
+  margin-top: 0; opacity: .82;
+  min-width: min(240px, 40vw);
+  justify-content: center;
+}
+.tabBtn.activeTab {
+  opacity: 1;
+  border-image: url("assets/ui/theme/ui_button_primary_long.png?tv=6") 26 fill / 14px stretch;
+  color: #2a1c05; text-shadow: 0 1px 0 rgba(255,255,255,.4);
+}
+.tabBtn.activeTab .crownTag { color: #6b4d0e; }
+.tabIcoSlot { width: 24px; height: 24px; display: inline-grid; place-items: center; flex: none; margin-right: 7px; }
+.tabIcoSlot .tabIco { max-width: 100%; max-height: 100%; object-fit: contain; filter: drop-shadow(0 1px 2px rgba(0,0,0,.5)); }
+/* the scrolling content row; the trailing pad keeps the last line of any pane
+   (the Daily Siege retry note) clear of the footer's decorative top edge */
+.boardBody { min-height: 0; overflow-y: auto; padding-bottom: 8px; }
+
+/* ---- decree cards: three across, one shared internal grid so titles,
+        bars, rewards and buttons align across all three ---- */
+.decreeRow { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--ui-gap); align-items: stretch; }
+.decreeCard {
+  display: grid; grid-template-rows: auto minmax(42px, 1fr) auto minmax(42px, auto);
+  gap: 6px; text-align: left;
+  padding: calc(10px * var(--ui-scale)) calc(12px * var(--ui-scale));
+  border: 2px solid transparent; border-radius: 12px; min-width: 0;
+  border-image: url("assets/ui/theme/ui_card_plain.png?tv=6") 24 fill / 12px stretch;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
+  transition: box-shadow .2s ease;
+}
+.decreeCard.claimable { box-shadow: 0 0 16px rgba(255,205,90,.55), inset 0 1px 0 rgba(255,255,255,.08); }
+.decreeCard.claimed { opacity: .55; }
+.decreeTop { display: flex; align-items: flex-start; justify-content: space-between; gap: 6px; }
+/* fixed objective-icon slot: art is contained, never stretched; --iscale
+   only compensates for transparent padding baked into a source PNG */
+.decreeArtSlot { width: 48px; height: 48px; display: grid; place-items: center; flex: none; }
+.decreeArtSlot img {
+  width: calc(100% * var(--iscale, 1)); height: calc(100% * var(--iscale, 1));
+  object-fit: contain; filter: drop-shadow(0 3px 4px rgba(0,0,0,.55));
+}
+.decreeCat { font-size: 10.5px; color: #8fa0b8; text-transform: uppercase; letter-spacing: .06em; text-align: right; line-height: 1.3; padding-top: 3px; }
+.decreeText { font-size: 14.5px; color: #ffe9b0; font-weight: bold; line-height: 1.3; min-width: 0; overflow-wrap: break-word; }
+.decreeProg { display: flex; flex-direction: column; gap: 3px; align-self: end; }
+.decreeCount { font-size: 12px; color: #cbb98f; }
+.decreeAction { display: flex; align-items: center; justify-content: space-between; gap: 6px; min-height: 42px; }
+.decreeReward { font-size: 12.5px; color: #9fb0c8; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
+.decreeReward .curIco { width: 16px; height: 18px; }
+.decreeDone { font-size: 13px; color: #7ed957; font-weight: bold; display: inline-flex; align-items: center; gap: 4px; }
+.decreeDone .curIco { width: 16px; height: 18px; }
+.decreeClaimBtn { animation: claimGlow 1.6s ease infinite; }
+@keyframes claimGlow {
+  0%, 100% { box-shadow: 0 0 6px rgba(255,205,90,.35); }
+  50% { box-shadow: 0 0 16px rgba(255,205,90,.8); }
+}
+.rerollBtn { margin-top: 0; min-height: 36px; font-size: 12.5px; padding: 4px 10px; margin-left: auto; }
+/* completion-bonus bar: its own row with air above and below; `round`
+   edge tiling keeps the beaded frame crisp at any width (stretch smears) */
+.decreeBonus {
+  margin: calc(14px * var(--ui-scale)) 0 4px; padding: 9px 16px; font-size: 14px; color: #cbb98f;
+  display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap;
+  border: 2px solid transparent; border-radius: 10px;
+  border-image: url("assets/ui/theme/ui_info_box_long.png?tv=6") 28 fill / 14px round;
+}
+.decreeBonus .curIco { width: 15px; height: 17px; vertical-align: -3px; }
+.decreeBonus.ready { color: #ffe9b0; font-weight: bold; }
+.decreeBonus.done { color: #7ed957; }
+
+/* ---- daily siege briefing ---- */
+.siegeBriefGrid { display: grid; grid-template-columns: 1.5fr 1fr; gap: calc(var(--ui-gap) + 4px); text-align: left; align-items: start; }
+.siegeBriefLeft { min-width: 0; }
+.siegeThemeName { font-size: 21px; font-weight: bold; color: #ffd77a; text-shadow: 0 0 12px rgba(255,200,80,.35), 0 2px 3px #000; }
+.siegeThemeDesc { font-size: 13.5px; color: #cbb98f; font-style: italic; margin-bottom: 4px; }
+.siegeSection {
+  font-size: 12px; color: #ffd77a; text-transform: uppercase; letter-spacing: .08em;
+  margin: 11px 0 6px; border-bottom: 1px solid #4a5468; padding-bottom: 2px;
+}
+/* preset room cards: one reusable component — fixed footprint, fixed
+   sprite slot, two-line name reserve, level pinned to the bottom */
+.siegeRoomRow { display: flex; gap: 8px; flex-wrap: wrap; }
+.siegeRoomCard {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  padding: 6px 5px 7px; width: 96px; text-align: center;
+  border: 2px solid transparent; border-radius: 10px;
+  border-image: url("assets/ui/theme/ui_card_plain.png?tv=6") 24 fill / 10px stretch;
+}
+.siegeRoomArtSlot { width: 100%; height: 46px; display: grid; place-items: center; flex: none; }
+.siegeRoomArtSlot .siegeRoomArt {
+  width: calc(46px * var(--iscale, 1)); height: calc(46px * var(--iscale, 1));
+  object-fit: contain; filter: drop-shadow(0 2px 3px rgba(0,0,0,.55)); font-size: 26px;
+  display: flex; align-items: center; justify-content: center;
+}
+.siegeRoomName {
+  font-size: 10.5px; color: #ffe9b0; font-weight: bold; line-height: 1.2;
+  min-height: 2.4em; display: flex; align-items: center; justify-content: center;
+}
+.siegeRoomLv { font-size: 10.5px; color: #7ad9a0; margin-top: auto; }
+/* modifiers / expected foes / castle rules: distinct rows, steady rhythm */
+.siegeModList { display: flex; flex-direction: column; gap: 4px; }
+.siegeModRow { font-size: 12.5px; color: #ffb27a; display: grid; grid-template-columns: 16px 1fr; gap: 6px; align-items: baseline; line-height: 1.35; }
+.siegeModRow.boon { color: #9fd8b0; }
+.siegeModRow b { color: #ffe9b0; }
+.siegeModBullet { text-align: center; }
+.siegeModTxt { min-width: 0; }
+.siegeFeatured { font-size: 12px; color: #9fb0c8; margin-top: 9px; line-height: 1.45; overflow-wrap: break-word; }
+.siegeFeatured b { color: #cbb98f; }
+/* reward tiers: one row component — stars | requirement | seal value */
+.siegeBriefRight { display: flex; flex-direction: column; gap: 8px; min-width: 0; min-height: 0; }
+.siegeTierRow {
+  display: grid; grid-template-columns: 58px 1fr auto; align-items: center; gap: 8px;
+  padding: 7px 12px; min-height: 44px; font-size: 12.5px; color: #cbb98f;
+  border: 2px solid transparent; border-radius: 10px;
+  border-image: url("assets/ui/theme/ui_card_plain.png?tv=6") 24 fill / 10px stretch;
+}
+.siegeTierRow.earned { color: #7ed957; box-shadow: 0 0 8px rgba(126,217,87,.3); }
+.siegeTierStarsCol { display: flex; align-items: center; gap: 2px; }
+.siegeTierMini { width: 16px; height: 16px; object-fit: contain; filter: drop-shadow(0 1px 2px rgba(0,0,0,.5)); }
+.siegeTierLbl { color: #ffe9b0; min-width: 0; line-height: 1.3; }
+.siegeTierLbl b { color: #ffd77a; }
+.siegeTierRow.earned .siegeTierLbl, .siegeTierRow.earned .siegeTierLbl b { color: #7ed957; }
+.siegeTierVal { display: inline-flex; align-items: center; gap: 4px; font-weight: bold; color: #ffe9b0; white-space: nowrap; }
+.siegeTierVal .curIco { width: 15px; height: 17px; }
+.siegeBest, .siegeSeals { font-size: 12.5px; color: #cbb98f; text-align: center; }
+.siegeBest b, .siegeSeals b { color: #ffe9b0; }
+/* start button + retry note are ONE block in normal flow, pushed to the foot
+   of the Daily Siege column with its own reserved space beneath the note —
+   nothing here is positioned against the board, the viewport or the footer */
+.siegeActions { padding-top: 2px; display: flex; flex-direction: column; gap: 6px; }
+.siegePlayBtn { width: 100%; margin-top: 0; }
+.siegeBtnIco { width: 24px; height: 24px; object-fit: contain; margin-right: 8px; filter: drop-shadow(0 1px 2px rgba(0,0,0,.5)); }
+.siegeRetryNote { text-align: center; font-size: 11px; margin: 0; line-height: 1.3; min-height: 2.6em; }
+
+/* ---- kingdom restoration strip + overlay ---- */
+/* footer: summary strip owns the flexible column, Back button its own
+   fixed column — they can never stack on each other. The container sprite
+   paints a 21px side / 12px top-bottom ornament that layout does NOT
+   reserve (border-image-width never affects layout), so the frame's safe
+   area has to come from padding. */
+.boardFooter {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center; gap: 12px; border-image-repeat: round;
+  padding: 13px 20px; flex-wrap: nowrap;
+}
+.boardFooter .bigBtn.small { flex: 0 0 auto; align-self: center; margin: 0; }
+/* summary strip: thumbnail | title · progress · metadata | prosperity total.
+   Its own frame sprite gets padding clear of the footer frame it sits in, so
+   the two ornaments never share the same pixels. */
+#kingdomStrip {
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center; gap: 12px; cursor: pointer;
+  padding: 9px 16px; text-align: left; min-width: 0; min-height: 78px;
+  border: 2px solid transparent; border-radius: 10px;
+  border-image: url("assets/ui/theme/ui_info_box_long.png?tv=6") 28 fill / 14px round;
+}
+#kingdomStrip:active { filter: brightness(1.1); }
+.kingdomArt { width: 44px; height: 44px; object-fit: contain; flex: none; filter: drop-shadow(0 2px 3px rgba(0,0,0,.55)); }
+.kingdomBody { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.kingdomName { font-size: 13px; font-weight: bold; color: #ffe9b0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.kingdomMeta { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 8px; font-size: 11.5px; color: #cbb98f; min-width: 0; }
+.kingdomStat { display: inline-flex; align-items: center; gap: 3px; min-width: 0; }
+/* the strip's progress bar needs enough weight to read at a glance */
+#kingdomStrip .msBar { height: 9px; margin: 0; border-radius: 5px; box-shadow: inset 0 1px 2px rgba(0,0,0,.6); }
+.kingdomStars { font-size: 15px; font-weight: bold; color: #ffd77a; text-shadow: 0 1px 2px #000; display: flex; align-items: center; gap: 4px; align-self: center; }
+.krStarIco { width: 18px; height: 18px; object-fit: contain; vertical-align: -3px; }
+.krStripSeal { width: 13px; height: 15px; object-fit: contain; }
+.krSpendBadge {
+  padding: 1px 7px; border-radius: 9px; font-weight: bold; white-space: nowrap;
+  display: inline-flex; align-items: center; gap: 3px;
+  color: #ffd24a; background: rgba(255, 210, 74, .12); border: 1px solid rgba(255, 210, 74, .4);
+  animation: claimGlow 1.6s ease infinite;
+}
+#kingdomOverlay {
+  position: absolute; inset: 0; z-index: var(--z-overlay, 40);
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(6, 9, 15, .72);
+  padding: var(--screen-pad-y) var(--screen-pad-x);
+}
+/* isolate: the panel's internal z-indices (map depth, labels) can never
+   compete with overlay-level siblings like the celebration modal */
+#kingdomPanel { max-width: min(var(--panel-max-w), 860px); width: 100%; text-align: center; display: flex; flex-direction: column; overflow: hidden; isolation: isolate; }
+/* while the celebration modal is open the whole panel beneath is inert:
+   no marker taps, no hover motion, no focus */
+#kingdomOverlay.krModalOpen #kingdomPanel { pointer-events: none; }
+#kingdomOverlay.krModalOpen .krSiteArt { transition: none; }
+
+/* header: title · seal balance · prosperity meter */
+.krHeader { display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; flex: 0 0 auto; }
+.krTitle { margin: 0; font-size: 21px; }
+/* Prosperity meter. ui_prosperity_meter.png is 336×98 with an OPAQUE recessed
+   interior, so the sprite is the track: it paints first and the fill is
+   clipped to its inner well above it. The box is held at the sprite's exact
+   aspect ratio at every breakpoint, so `object-fit: contain` leaves no
+   letterbox and these percentage offsets land on the artwork's own pixels.
+   Inner well measured at x 91..313, y 31..65 of the source PNG. */
+.krMeter {
+  position: relative; width: 188.6px; height: 55px; flex: none;
+  --krm-l: 27.08%; --krm-r: 6.55%; --krm-t: 31.63%; --krm-b: 32.65%;
+}
+.krMeterFrame { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
+.krMeterTrough {
+  position: absolute;
+  left: var(--krm-l); right: var(--krm-r); top: var(--krm-t); bottom: var(--krm-b);
+  border-radius: 2px; overflow: hidden; pointer-events: none;
+}
+.krMeterFill {
+  height: 100%; width: 0;
+  background: linear-gradient(180deg, #ffe08a, #d99a2b);
+  box-shadow: inset 0 -1px 3px rgba(120, 70, 0, .55), 0 0 8px rgba(255, 210, 100, .5);
+  transition: width 280ms ease-out;
+}
+/* the sprite's own cell dividers, redrawn over the fill so the segmented
+   frame still reads once the gold covers it */
+.krMeterSeg {
+  position: absolute; top: 0; bottom: 0; width: 1px; margin-left: -.5px;
+  background: rgba(26, 18, 6, .55); pointer-events: none;
+}
+.krMeterLabel {
+  position: absolute; left: var(--krm-l); right: var(--krm-r); top: 50%; transform: translateY(-50%);
+  font-size: 11px; font-weight: bold; color: #ffe9b0; text-shadow: 0 1px 2px #000, 0 0 4px #000;
+  pointer-events: none;
+}
+/* the fill is a readout first and an animation second */
+@media (prefers-reduced-motion: reduce) {
+  .krMeterFill, .krBarFill { transition: none; }
+}
+
+/* the layered kingdom map (with optional docked project panel beside it) */
+.krBody { display: flex; gap: 10px; align-items: center; justify-content: center; flex: 0 1 auto; min-height: 0; }
+.krMapWrap { width: 100%; max-width: 660px; margin: 6px auto 0; flex: 0 1 auto; min-height: 0; }
+.krBody.hasDock .krMapWrap { flex: 1 1 auto; min-width: 0; margin: 6px 0 0; }
+/* the map container matches the artwork's exact aspect ratio (717×349), so
+   the rendered image rectangle IS the container — marker percentages are
+   always relative to real map pixels, with no letterbox drift. `isolation`
+   contains every marker depth value inside the map. */
+.krMap { position: relative; width: 100%; padding-bottom: 48.7%; /* 717x349 */ isolation: isolate; }
+.krLayer { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
+.krRuins { opacity: .9; }
+.krGlow { mix-blend-mode: screen; }
+/* district sites: the stage art itself sits on the map at its ground anchor
+   (base-center = the district's map coords) and swaps as checkpoints land.
+   The marker element is NOT a stacking context — its children layer inside
+   .krMap directly: site art by ground-line depth (--mz, 10–95), overlay
+   icons at the same depth (DOM order keeps them over their own art), and
+   every label above ALL site art so no building can swallow a name. */
+.krMarker { position: absolute; transform: translate(-50%, -100%); cursor: pointer; }
+.krSiteArt {
+  display: block; width: 100%; height: auto;
+  position: relative; z-index: var(--mz, 10);
+  filter: drop-shadow(0 3px 4px rgba(0,0,0,.55));
+  transition: transform .12s ease;
+}
+.krMarker:active .krSiteArt { transform: scale(1.07); }
+.krMarker.locked .krSiteArt { filter: grayscale(.85) brightness(.55) drop-shadow(0 3px 4px rgba(0,0,0,.55)); opacity: .9; }
+.krMarker.active .krSiteArt { filter: drop-shadow(0 0 9px rgba(255,215,122,.85)) drop-shadow(0 3px 4px rgba(0,0,0,.55)); }
+.krMarker.viewing .krSiteArt { filter: drop-shadow(0 0 8px rgba(150,205,255,.9)) drop-shadow(0 3px 4px rgba(0,0,0,.55)); }
+/* overlay icon widths are set inline (normalized per marker width) so every
+   lock/badge/seal reads as one consistent on-map size */
+.krLock {
+  position: absolute; left: 50%; top: 40%; transform: translate(-50%, -50%);
+  height: auto; pointer-events: none; z-index: var(--mz, 10);
+  filter: drop-shadow(0 2px 3px rgba(0,0,0,.7));
+}
+.krBadge {
+  position: absolute; top: -8%; right: -6%; height: auto;
+  object-fit: contain; pointer-events: none; z-index: var(--mz, 10);
+  filter: drop-shadow(0 2px 3px rgba(0,0,0,.7));
+}
+.krReady {
+  position: absolute; top: -8%; left: -4%; height: auto;
+  object-fit: contain; pointer-events: none; z-index: var(--mz, 10);
+  filter: drop-shadow(0 2px 3px rgba(0,0,0,.7));
+  animation: claimGlow 1.6s ease infinite;
+}
+.krSiteLabel {
+  position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
+  margin-top: -4px; display: flex; flex-direction: column; align-items: center;
+  pointer-events: none; z-index: var(--z-map-label, 200);
+}
+/* crowded districts can anchor their label above the art instead
+   (nudged right so it clears the Barracks label on small maps) */
+.krMarker.lblTop .krSiteLabel { top: auto; bottom: 100%; margin: 0 0 2px; transform: translateX(-22%); }
+.krMarker.lblTop .krNew { top: auto; bottom: calc(100% + 30px); }
+.krMarkerName {
+  white-space: nowrap; font-size: 10.5px; font-weight: bold; color: #ffe9b0;
+  text-shadow: 0 1px 2px #000, 0 0 4px #000, 0 0 2px #000;
+}
+.krMarker.locked .krMarkerName { color: #b6c2d4; }
+.krMarkerSub {
+  white-space: nowrap; font-size: 9.5px; color: #ffd77a;
+  text-shadow: 0 1px 2px #000, 0 0 4px #000, 0 0 2px #000;
+  display: flex; align-items: center; justify-content: center; gap: 2px;
+}
+.krMarker.locked .krMarkerSub { color: #9fb0c8; }
+.krSubStar { width: 12px; height: 12px; object-fit: contain; vertical-align: -2px; }
+.krNew {
+  position: absolute; top: -13px; left: 50%; transform: translateX(-50%);
+  font-size: 9px; font-weight: bold; letter-spacing: .08em; color: #12100e;
+  background: #ffd24a; border-radius: 7px; padding: 1px 6px; pointer-events: none;
+  animation: claimGlow 1.6s ease infinite; z-index: 210;
+}
+@keyframes krShake { 0%, 100% { margin-left: 0; } 25% { margin-left: -4px; } 75% { margin-left: 4px; } }
+.krMarker.krDenied { animation: krShake .3s ease; }
+.krHint { margin: 4px auto 0; max-width: 560px; flex: 0 0 auto; }
+.krHint .curIco { width: 13px; height: 15px; }
+.krFootRow { display: flex; justify-content: center; gap: 10px; flex: 0 0 auto; }
+.krFootRow .bigBtn.small { margin-top: 8px; }
+
+/* ---- docked district project panel ----
+   Slides in over the map's right edge; the map stays visible and tappable
+   beside it.
+
+   The parchment card sprite is 310×346 with UNEVEN transparent padding
+   (opaque art runs x 30–305, y 5–318), so the element box is NOT usable
+   content space. These variables are measured off the sprite and map its
+   three bands onto the stretched background:
+
+     banner blue field   x 100–238   y  12–45
+     parchment field     x  57–280   y  57–265
+     bottom plaque       x  50–285   y 275–312   (decorative — no content)
+
+   Everything below derives from them: no element carries a one-off offset,
+   and the card's geometry is identical in the inactive, active and restored
+   states because the action/status slot is one reserved row. */
+.krDock {
+  /* parchment safe area (% of the card box) */
+  --pc-safe-left: 20%;
+  --pc-safe-right: 11.3%;
+  --pc-safe-top: 16.5%;
+  --pc-safe-bottom: 23.4%;
+  /* title banner band */
+  --pc-banner-top: 4%;
+  --pc-banner-h: 8.7%;
+  --pc-banner-left: 33.5%;
+  --pc-banner-right: 24.5%;
+  /* The card is sized so the parchment holds every row of its TALLEST state
+     (active: stage · description · checkpoints · bar · next · contributions),
+     capped by the height the overlay can actually spare. Row metrics scale
+     with that same budget, so there is no cliff between breakpoints and no
+     transform:scale() anywhere. 500px is measured, not decorative: at full
+     row metrics (vh ≥ ~680) the active state's rows total ~198px of body
+     while a 442px card left only 186 — every ~700px-tall device scrolled the
+     parchment. 500 gives the body ~244px, honest headroom included. */
+  --pc-target-h: 500px;
+  /* everything the kingdom overlay spends above and below the card row
+     (screen pad + panel pad + header + foot row + the card's own margin),
+     measured per breakpoint and biased a few px high: running short only
+     costs parchment, running long would paint the card over the foot row */
+  --pc-overhead: 204px;
+  --pc-avail: calc(100vh - var(--pc-overhead));
+  --pc-avail: calc(100dvh - var(--pc-overhead));
+  --pc-ink: 11px;
+  --pc-ink: clamp(9.2px, 1.62vh, 11px);
+  --pc-ink: clamp(9.2px, 1.62dvh, 11px);
+  --pc-node: 22px;
+  --pc-node: clamp(15px, 3.2vh, 22px);
+  --pc-node: clamp(15px, 3.2dvh, 22px);
+  --pc-bar-h: 34px;
+  --pc-bar-h: clamp(26px, 5vh, 34px);
+  --pc-bar-h: clamp(26px, 5dvh, 34px);
+  --pc-action-h: 42px;
+  --pc-action-h: clamp(29px, 6.2vh, 42px);
+  --pc-action-h: clamp(29px, 6.2dvh, 42px);
+  /* gap max is 3px, not 4: at full row metrics the seal hint needs those
+     six pixels back to render its third line whole instead of half-clipped */
+  --pc-row-gap: 3px;
+  --pc-row-gap: clamp(1px, 0.6vh, 3px);
+  --pc-row-gap: clamp(1px, 0.6dvh, 3px);
+
+  position: relative; flex: 0 0 272px; min-width: 0; align-self: stretch;
+  min-height: min(var(--pc-target-h), var(--pc-avail));
+  margin: 6px 0 0;
+  background: url("assets/kingdom-restoration/ui/ui_district_project_card.png?kv=1") center / 100% 100% no-repeat;
+  /* ONE internal grid:
+     spacer · banner(title) · stone rail · body · controls · action · plaque
+     Only the body row flexes; the controls and the action slot always keep
+     their height, so contribution buttons and the status can never be
+     squeezed out by a long description. */
+  display: grid;
+  grid-template-rows:
+    var(--pc-banner-top)
+    var(--pc-banner-h)
+    calc(var(--pc-safe-top) - var(--pc-banner-top) - var(--pc-banner-h))
+    minmax(0, 1fr)
+    auto
+    minmax(var(--pc-action-h), auto)
+    var(--pc-safe-bottom);
+  padding: 0;
+  text-align: center; animation: krDockIn .18s ease;
+}
+@keyframes krDockIn { from { opacity: 0; transform: translateX(14px); } to { opacity: 1; transform: none; } }
+/* percentage margins on grid items resolve against the grid area's inline
+   size — the card's own width — so the safe area is honoured at every size
+   (percentage PADDING on the flex item would resolve against .krBody) */
+.krDockBody { grid-row: 4; margin: 0 var(--pc-safe-right) 0 var(--pc-safe-left); }
+.krDockControls { grid-row: 5; margin: 0 var(--pc-safe-right) 0 var(--pc-safe-left); }
+.krDockAction { grid-row: 6; margin: 0 var(--pc-safe-right) 0 var(--pc-safe-left); }
+.krDockHead, .krDockBody, .krDockControls, .krDockAction { min-width: 0; min-height: 0; }
+.krDockControls:empty { display: none; }
+
+/* title, centred inside the blue ribbon */
+.krDockHead {
+  grid-row: 2; margin: 0 var(--pc-banner-right) 0 var(--pc-banner-left);
+  display: flex; align-items: center; justify-content: center; overflow: hidden;
+}
+.krDockName {
+  font-size: var(--pc-title-size, 12.5px); font-weight: bold; color: #ffe9b0;
+  text-shadow: 0 1px 2px #000, 0 0 3px rgba(0,0,0,.7);
+  line-height: 1.15; max-width: 100%; overflow: hidden;
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2;
+}
+/* body inside the parchment safe area: dark ink on light paper. Every row has
+   a fixed purpose; only the description and the trailing hint may absorb
+   pressure, and .krDockBody clips so nothing can reach the stone frame. */
+.krDockBody {
+  /* last-resort escape valve on extremely short displays: the parchment
+     scrolls rather than swallowing a row — no checkpoint or control is ever
+     hidden outright, and nothing can spill onto the frame */
+  overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain;
+  scrollbar-width: thin; scrollbar-color: rgba(122, 76, 14, .45) transparent;
+  display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+  gap: var(--pc-row-gap);
+}
+.krDockBody::-webkit-scrollbar { width: 4px; }
+.krDockBody::-webkit-scrollbar-thumb { background: rgba(122, 76, 14, .45); border-radius: 2px; }
+.krDockBody > * { flex: 0 0 auto; width: 100%; }
+.krDockStage { font-size: calc(var(--pc-ink) + 0.5px); font-weight: bold; color: #7a4c0e; line-height: 1.25; }
+/* the description is the one row allowed to absorb pressure, but never below
+   two whole lines — it truncates at a line boundary, never mid-glyph */
+.krDesc {
+  flex: 0 1 auto; min-height: 2.64em; overflow: hidden;
+  font-size: var(--pc-ink); color: #6b5232; font-style: italic; line-height: 1.32;
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4;
+}
+/* four equal checkpoint columns — nodes, percentages and rewards each align
+   across the row because they are rows of one grid, not free-floating text */
+.krPips { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); align-items: start; }
+.krPip {
+  display: grid; grid-template-rows: auto auto auto; justify-items: center; gap: 1px;
+  font-size: calc(var(--pc-ink) - 1px); font-weight: bold; color: #8a7754; min-width: 0;
+}
+.krPipNode { display: grid; place-items: center; width: 100%; height: var(--pc-node); }
+.krPipNode img { width: calc(var(--pc-node) * 0.91); height: var(--pc-node); object-fit: contain; }
+.krPipPct { line-height: 1.1; }
+.krPipStars { display: inline-flex; align-items: center; gap: 2px; font-weight: normal; line-height: 1.1; }
+.krPip.is-complete { color: #3f7d2c; }
+.krPip.is-current { color: #a06f00; }
+.krPip.is-current .krPipNode img { filter: drop-shadow(0 0 5px rgba(255,215,122,.8)); }
+/* District restoration bar. ui_project_progress_bar.png is 352×75 with an
+   OPAQUE recessed panel, so the sprite is the track: frame first, fill clipped
+   to the panel above it. The frame stretches to the box (as it always has),
+   so these percentages track the artwork at any width. Panel measured at
+   x 40..321, y 23..53, then held in by ~1% so the fill clears the gold inner
+   curve at each end — it never reaches either gem end cap. */
+.krBar {
+  position: relative; width: 100%; height: var(--pc-bar-h); flex: 0 0 auto;
+  --krb-l: 12.3%; --krb-r: 9.5%; --krb-t: 31.5%; --krb-b: 28.8%;
+}
+.krBarFrame { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.krBarTrough {
+  position: absolute;
+  left: var(--krb-l); right: var(--krb-r); top: var(--krb-t); bottom: var(--krb-b);
+  border-radius: 3px; overflow: hidden; pointer-events: none;
+}
+.krBarFill {
+  height: 100%; width: 0;
+  background: linear-gradient(180deg, #9fd8ff, #2f7fd0 55%, #1d5ea6);
+  box-shadow: inset 0 -1px 3px rgba(0, 40, 90, .5), 0 0 8px rgba(90, 170, 255, .55);
+  transition: width 280ms ease-out;
+}
+.krBarLabel {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  font-size: calc(var(--pc-ink) + 1px); font-weight: bold; color: #eaf3ff; text-shadow: 0 1px 2px #000, 0 0 4px #000;
+  pointer-events: none;
+}
+/* next checkpoint: label / cost / reward — three real lines, icons in fixed
+   inline slots that sit on the text baseline */
+.krNextRow { display: flex; flex-direction: column; align-items: center; font-size: var(--pc-ink); color: #4a3a1e; line-height: 1.28; }
+.krNextRow b { color: #2a1c05; }
+.krNextLbl { font-weight: bold; }
+.krNextLine { display: inline-flex; align-items: center; justify-content: center; gap: 3px; flex-wrap: nowrap; min-width: 0; }
+.krIcoSlot { display: inline-flex; align-items: center; justify-content: center; flex: none; }
+/* the icon slot never grows the line box it sits in */
+.krNextIco { width: calc(var(--pc-ink) + 2px); height: var(--pc-ink); object-fit: contain; }
+.krNextLine .krIcoSlot, .krPipStars .krIcoSlot { height: 1em; }
+/* contribution controls sit in their own always-visible row */
+.krDockControls { display: flex; align-items: center; justify-content: center; padding: var(--pc-row-gap) 0 0; }
+.krBtnRow { display: flex; gap: 6px; width: 100%; justify-content: center; }
+/* the reserved action/status row — same slot for the button and the badge */
+.krDockAction { display: flex; align-items: center; justify-content: center; padding: 2px 0 0; }
+.krBtn {
+  position: relative; cursor: pointer; color: #fff;
+  font-family: inherit; font-weight: bold; font-size: calc(var(--pc-ink) + 1.5px);
+  min-height: var(--pc-action-h); padding: 4px 10px; border-radius: 10px;
+  /* nine-sliced so the gold end caps keep their size at any button width */
+  border: 2px solid transparent;
+  border-image: url("assets/kingdom-restoration/ui/ui_claim_reward_button.png?kv=1") 30 34 fill / 9px 11px round;
+  text-shadow: 0 1px 2px rgba(0,0,0,.85), 0 0 4px rgba(0,0,0,.5);
+  display: inline-flex; align-items: center; justify-content: center; gap: 4px;
+}
+.krBtn:active { filter: brightness(1.15); }
+.krBtn:disabled { filter: grayscale(.7) brightness(.75); cursor: default; }
+.krBtn.krContrib { flex: 1 1 0; min-width: 0; min-height: calc(var(--pc-action-h) - 8px); padding: 4px 4px; }
+.krBtnSeal { width: 14px; height: 16px; object-fit: contain; }
+.krBtn.krSelect {
+  border-image: url("assets/kingdom-restoration/ui/ui_select_project_button.png?kv=1") 28 46 fill / 8px 15px round;
+  width: 100%; min-height: calc(var(--pc-action-h) - 4px); padding: 4px 6px;
+}
+.krBtnLbl {
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2;
+  overflow: hidden; line-height: 1.15;
+}
+.krActiveTag {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  font-size: calc(var(--pc-ink) + 1px); font-weight: bold; color: #7ed957;
+  text-shadow: 0 1px 2px #000, 0 0 4px rgba(0,0,0,.6);
+  min-width: 0; white-space: nowrap; line-height: 1.2;
+}
+.krActiveTag img { width: calc(var(--pc-node) * 0.82); height: var(--pc-node); object-fit: contain; flex: none; }
+.krActiveTag.krDoneTag img { width: var(--pc-node); height: calc(var(--pc-node) * 0.92); }
+.krNoSeals { flex: 0 1 auto; overflow: hidden; margin: 0; font-size: calc(var(--pc-ink) - 0.5px); color: #7a6544; line-height: 1.28; }
+.krCompleteRow { display: flex; align-items: center; gap: 8px; font-size: calc(var(--pc-ink) + 0.5px); color: #4a3a1e; text-align: left; line-height: 1.3; }
+.krCompleteRow b { color: #3f7d2c; }
+.krCompleteIco { width: calc(var(--pc-node) * 1.7); height: calc(var(--pc-node) * 1.55); object-fit: contain; flex: none; }
+
+/* ---- celebration modal ("The Kingdom Rises") ----
+   True modal at the top of the layer scale: its backdrop covers and dims the
+   whole overlay, blocks every interaction beneath, and no map element can
+   paint above it (marker depth is isolated inside .krMap / #kingdomPanel). */
+#krNotice {
+  position: absolute; inset: 0; z-index: var(--z-modal-backdrop, 1000);
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(5, 8, 13, .78);
+  padding: var(--screen-pad-y) var(--screen-pad-x);
+}
+#krNotice.hidden { display: none; }
+.krNoticePanel { max-width: min(88vw, 440px); width: 100%; text-align: center; }
+.krNoticeHead { display: flex; flex-direction: column; align-items: center; gap: 2px; margin-bottom: 6px; }
+.krNoticeCrest { width: 54px; height: 52px; object-fit: contain; filter: drop-shadow(0 0 12px rgba(255,205,90,.45)) drop-shadow(0 2px 3px rgba(0,0,0,.6)); }
+.krNoticePanel h3 { color: #ffd77a; font-size: 19px; margin: 0; text-shadow: 0 0 10px rgba(255,205,90,.5), 0 2px 3px #000; }
+.krNoticeBody { max-height: min(46vh, 300px); overflow-y: auto; overscroll-behavior: contain; }
+.krNoticeRow {
+  display: grid; grid-template-columns: 42px 1fr; align-items: center; gap: 10px; text-align: left;
+  font-size: 13px; color: #cbb98f; line-height: 1.4; margin: 8px 0;
+}
+.krNoticeRow b { color: #ffe9b0; }
+/* the four completion medallions are square art: a SQUARE slot with
+   object-fit: contain is what guarantees none of them is ever stretched, and
+   that all four read at exactly the same size whichever milestone fired.
+   Every other notice icon rides the same slot, so the rows stay aligned. */
+.krNoticeIco { width: 42px; height: 42px; object-fit: contain; justify-self: center; filter: drop-shadow(0 2px 3px rgba(0,0,0,.6)); }
+/* restoration milestone row: district + percentage, then one line per reward */
+.krRewardHead { display: block; font-size: 14px; margin-bottom: 2px; }
+.krRewardLine { display: block; }
+.krRewardLbl { color: #9fb0c8; }
+.krNoticeActions { margin-top: 10px; }
+.krNoticeActions .bigBtn.small { margin-top: 0; min-width: 160px; margin-left: auto; margin-right: auto; }
+
+/* Compact card mode. The row METRICS already scale continuously with the
+   height budget (--pc-ink / --pc-node / --pc-bar-h / --pc-action-h), so these
+   tiers only make the structural decisions: how much overhead the overlay
+   costs, and which OPTIONAL row is dropped. The title, stage, all four
+   checkpoints, the progress bar, the next-checkpoint block and the
+   action/status slot are never removed and never scaled by transform. */
+/* mid band (~660–800px tall): all rows keep full metrics, so the flavour
+   description is held to its two-line minimum — the required rows (stage,
+   four checkpoints, bar, next checkpoint, controls, status) never compete
+   with a four-line description for parchment */
+@media (orientation: landscape) and (max-height: 800px) {
+  .krDesc { -webkit-line-clamp: 2; }
+}
+@media (max-height: 660px) {
+  /* the supporting hint is the first thing to go, before any required row */
+  .krDock .krNoSeals { display: none; }
+  .krDesc { -webkit-line-clamp: 2; }
+}
+@media (max-height: 560px) {
+  .krHeader { gap: 8px; }
+  .krTitle { font-size: 17px; }
+  /* width stays height × 336/98 so the fill offsets keep hitting the sprite */
+  .krMeter { width: 144px; height: 42px; }
+  .krMapWrap { max-width: min(560px, calc((100vh - 205px) * 2.05)); }
+  .krDock {
+    flex-basis: 244px;
+    --pc-overhead: 168px;
+    --pc-title-size: 11.5px;
+  }
+  .krFootRow .bigBtn.small { margin-top: 5px; }
+}
+/* below this the parchment can no longer hold the flavour description as well
+   as every required row, so the description is the next optional row to go */
+@media (max-height: 520px) {
+  .krDock .krDesc { display: none; }
+}
+@media (max-height: 480px) {
+  #kingdomPanel { padding: 8px 14px; }
+  .krMapWrap { max-width: min(490px, calc((100vh - 165px) * 2.05)); }
+  /* the overlay's own chrome gives up height before the card does */
+  .krTitle { font-size: 15px; }
+  .krMeter { width: 116.6px; height: 34px; }
+  .krFootRow .bigBtn.small { margin-top: 2px; min-height: 30px; font-size: 11.5px; padding: 2px 10px; }
+  .krMarkerName { font-size: 9px; }
+  .krMarkerSub { font-size: 8.5px; }
+  .krSiteLabel { margin-top: -3px; }
+  .krHint { font-size: 10.5px; margin-top: 2px; }
+  .krDock {
+    flex-basis: 228px;
+    --pc-overhead: 122px;
+    --pc-title-size: 10.5px;
+  }
+  .krSubStar { width: 10px; height: 10px; }
+}
+/* the shortest supported landscape phones: the last of the slack comes out of
+   spacing, never out of a row — all four checkpoints, the bar, the
+   next-checkpoint block, the contribution buttons and the status all stay */
+@media (max-height: 430px) {
+  .krDock { --pc-bar-h: 23px; --pc-overhead: 124px; --pc-row-gap: 1px; }
+  .krDockStage { font-size: var(--pc-ink); }
+  .krPip { gap: 0; }
+  .krNextRow { line-height: 1.18; }
+  .krDockAction { padding: 0; }
+  .krDockControls { padding: 0; }
+}
+/* 360px-class windows (old 16:9 phones, aggressive split screens): the last
+   row that can go is the "Next checkpoint:" caption — pure furniture, since
+   the stage name, seal cost and star reward lines below it all remain. The
+   bar and pip nodes slim down with it; no data leaves the card. */
+@media (max-height: 400px) {
+  .krDock { --pc-bar-h: 20px; --pc-node: 13px; }
+  .krNextLbl { display: none; }
+  .krNextRow { line-height: 1.1; }
+  .krPipPct, .krPipStars { line-height: 1; }
+}
+
+/* ---- siege result panel ---- */
+.siegeResultPanel { text-align: center; max-width: 480px; width: 100%; }
+/* The whole result — banner, title, tier, six stat rows, the seal award, the
+   note and both buttons — has to fit with NO internal scrolling: the buttons
+   are the only way off this screen, and a panel that scrolls hides them below
+   the frame. Same shock-absorber shape as .menuPanel (see #logoImg): a flex
+   column in which the ONLY shrinkable row is the artwork. The media tiers
+   below trim by viewport height, but they cannot see the safe-area insets —
+   --panel-max-h loses another ~50px to a status bar plus a gesture bar on
+   device — so the residue after the tier has done its work comes out of the
+   banner (object-fit keeps its aspect; the art simply renders smaller) rather
+   than out of the button row. Text rows keep min-height:auto and never
+   compress. */
+.siegeResultPanel { display: flex; flex-direction: column; align-items: stretch; }
+.siegeResultPanel > * { flex: 0 0 auto; }
+.siegeResultPanel .ricoBanner { flex: 0 1 auto; min-height: 0; object-fit: contain; }
+/* the stats block is inline-block-centred inside a flex column, so it needs
+   its own centring once the panel stops being a block container */
+.siegeResultPanel #siegeResultStats { align-self: center; }
+.siegeTierStars { margin: 2px 0 6px; display: flex; align-items: center; justify-content: center; gap: 4px; }
+.siegeTierStar { width: 30px; height: 30px; object-fit: contain; filter: drop-shadow(0 0 8px rgba(255,215,122,.6)); }
+.siegeTierName { font-size: 19px; font-weight: bold; color: #ffd77a; letter-spacing: .12em; margin-left: 6px; text-shadow: 0 1px 2px #000; }
+.siegeTierName.dimmed { color: #8494ac; letter-spacing: normal; font-size: 15px; }
+.siegeNewBest { color: #7ed957; font-size: 13px; font-weight: bold; animation: claimGlow 1.6s ease infinite; border-radius: 8px; padding: 1px 7px; }
+#siegeResultStats { display: inline-block; margin: 2px 0 4px; min-width: min(320px, 80%); }
+.siegeStatRow { display: flex; justify-content: space-between; gap: 18px; font-size: 13.5px; color: #cbb98f; line-height: 1.55; }
+.siegeStatRow b { color: #ffe9b0; }
+#siegeResultSeals { font-size: 20px; margin: 6px 0; }
+/* Adventurers' Board "claimable" state. daily.js still toggles .dailyAlert on
+   the same element; on the menu that element is now the icon's notification
+   pip, so the class supplies the pip's ready glow instead of a text colour. */
+.menuIcoBtn__badge.dailyAlert { box-shadow: 0 1px 3px rgba(0,0,0,.6), 0 0 8px rgba(255, 210, 74, .7); }
+
+/* ---- responsive: siege result, mid tier ----
+   Same 640–800px landscape band the menu and Board tiers use. Full-size
+   metrics need ~430px of panel; a phone at ~700px reports plenty of viewport
+   but hands the panel far less once the insets are taken out, so this tier
+   gives a little back everywhere instead of waiting for the 560 tier to fire.
+   Must stay ABOVE the 560 block below, which is the stronger override. */
+@media (orientation: landscape) and (max-height: 800px) {
+  .siegeResultPanel { padding: 14px 24px 16px; }
+  .siegeResultPanel h2 { font-size: 22px; margin-bottom: 2px; }
+  .siegeResultPanel .ricoBanner { margin: -6px auto 0; max-height: 24vh; max-height: 24dvh; }
+  .siegeStatRow { font-size: 13px; line-height: 1.45; }
+  #siegeResultSeals { font-size: 18px; margin: 4px 0; }
+  .siegeTierStars { margin: 0 0 4px; }
+  .siegeTierStar { width: 26px; height: 26px; }
+  .siegeTierName { font-size: 17px; }
+  .siegeResultPanel .rowBtns { margin-top: 6px; gap: 10px; }
+  .siegeResultPanel .rowBtns .bigBtn { min-height: 42px; font-size: 15px; padding: 7px 14px; }
+}
+
+/* ---- responsive: short landscape phones ---- */
+@media (max-height: 560px) {
+  .siegeResultPanel { padding: 8px 18px 10px; }
+  .siegeResultPanel h2 { font-size: 18px; margin-bottom: 1px; }
+  .siegeResultPanel .ricoBanner { margin: -4px auto 0; max-height: 14vh; max-height: 14dvh; }
+  .siegeStatRow { font-size: 11.5px; line-height: 1.3; gap: 14px; }
+  #siegeResultSeals { font-size: 14px; margin: 2px 0; }
+  .siegeTierStars { margin: 0 0 2px; }
+  .siegeTierStar { width: 20px; height: 20px; }
+  .siegeTierName { font-size: 14px; letter-spacing: .08em; }
+  .siegeNewBest { font-size: 12px; padding: 0 6px; }
+  .siegeResultPanel .subtext { font-size: 11.5px; }
+  .siegeResultPanel .rowBtns { flex-direction: row; margin-top: 4px; gap: 8px; }
+  .siegeResultPanel .rowBtns .bigBtn { min-height: 38px; font-size: 13.5px; padding: 5px 12px; }
+}
+/* short landscape boards. This used to start at 480px, which left 481–560 the
+   worst of both worlds: a full-size briefing in a panel too short to hold it,
+   so the Daily Siege column (and with it the start button and its retry note)
+   spilled past the content row and had to be scrolled to. */
+/* Adventurers' Board mid tier — same 640–800px landscape band as the menu
+   tier above. Full-size cards plus the footer strip need ~700px of panel on
+   desktop metrics and more on device text rendering, so every section gives
+   back a little height here: the goal is that BOTH tabs fit with no
+   .boardBody scrolling and the bonus row never meets the footer frame. The
+   560/430 tiers below stay the stronger override on shorter screens. */
+@media (orientation: landscape) and (max-height: 800px) {
+  .boardPanel { padding: 12px 18px; }
+  .boardTitleRow h2 { font-size: 19px; }
+  .boardTitleRow .hIco { width: 24px; height: 24px; vertical-align: -6px; }
+  .sealPill { font-size: 13px; }
+  .boardReset { font-size: 11.5px; }
+  .boardTabs { margin-top: 6px; }
+  .boardTabs .tabBtn { min-height: 40px; font-size: 14px; padding: 6px 16px; min-width: min(220px, 38vw); }
+  .tabIcoSlot { width: 20px; height: 20px; margin-right: 6px; }
+  /* decrees */
+  .decreeCard { padding: 8px 10px; gap: 4px; grid-template-rows: auto minmax(34px, 1fr) auto minmax(36px, auto); }
+  .decreeArtSlot { width: 40px; height: 40px; }
+  .decreeText { font-size: 13px; }
+  .decreeCount { font-size: 11px; }
+  .decreeCat { font-size: 9.5px; }
+  .decreeAction { min-height: 36px; }
+  .decreeClaimBtn { min-height: 34px; font-size: 13px; padding: 4px 10px; }
+  .rerollBtn { min-height: 32px; font-size: 11.5px; padding: 3px 9px; }
+  .decreeBonus { margin: 10px 0 2px; padding: 6px 12px; font-size: 12.5px; }
+  /* daily siege briefing */
+  .siegeThemeName { font-size: 18px; }
+  .siegeThemeDesc { font-size: 12.5px; margin-bottom: 3px; }
+  .siegeSection { font-size: 11px; margin: 8px 0 4px; }
+  .siegeRoomRow { gap: 6px; }
+  .siegeRoomCard { width: 86px; padding: 4px 4px 5px; }
+  .siegeRoomArtSlot { height: 40px; }
+  .siegeRoomArtSlot .siegeRoomArt { width: calc(40px * var(--iscale, 1)); height: calc(40px * var(--iscale, 1)); font-size: 23px; }
+  .siegeRoomName { font-size: 10px; }
+  .siegeRoomLv { font-size: 10px; }
+  .siegeModRow { font-size: 12px; }
+  .siegeFeatured { font-size: 11.5px; margin-top: 6px; }
+  .siegeBriefRight { gap: 6px; }
+  .siegeTierRow { padding: 4px 10px; min-height: 38px; font-size: 12px; grid-template-columns: 52px 1fr auto; }
+  .siegeTierMini { width: 14px; height: 14px; }
+  .siegeBest, .siegeSeals { font-size: 12px; }
+  .siegePlayBtn { min-height: 44px; font-size: 16px; }
+  .siegeRetryNote { font-size: 10.5px; }
+  /* shared footer: strip + Back give back height without losing legibility */
+  #kingdomStrip { min-height: 68px; padding: 8px 14px; gap: 10px; }
+  .kingdomArt { width: 38px; height: 38px; }
+  .kingdomName { font-size: 12px; }
+  .kingdomMeta { font-size: 10.5px; }
+  .kingdomStars { font-size: 13px; }
+  .boardFooter { padding: 11px 18px; gap: 10px; }
+  .boardFooter .bigBtn.small { min-height: 40px; font-size: 13.5px; padding: 5px 14px; }
+}
+
+@media (max-height: 560px) {
+  .boardPanel { padding: 8px 14px; }
+  .boardTitleRow h2 { font-size: 16px; }
+  .boardTitleRow .hIco { width: 20px; height: 20px; vertical-align: -5px; }
+  .boardMeta { gap: 6px; }
+  .sealPill { font-size: 12px; padding: 1px 8px; }
+  .boardReset { font-size: 10.5px; }
+  .boardTabs { margin-top: 4px; gap: 6px; }
+  .boardTabs .tabBtn { min-height: 32px; font-size: 12.5px; padding: 3px 12px; margin-top: 0; min-width: min(200px, 38vw); }
+  .tabIcoSlot { width: 18px; height: 18px; margin-right: 5px; }
+  .decreeRow { gap: 6px; }
+  .decreeCard { padding: 5px 8px; gap: 3px; grid-template-rows: auto minmax(30px, 1fr) auto minmax(32px, auto); }
+  .decreeArtSlot { width: 32px; height: 32px; }
+  .decreeText { font-size: 11.5px; }
+  .decreeCount { font-size: 10.5px; }
+  .decreeCat { font-size: 9px; }
+  .decreeAction { min-height: 32px; }
+  .decreeClaimBtn { min-height: 30px; font-size: 12px; padding: 3px 10px; }
+  .rerollBtn { min-height: 28px; font-size: 11px; padding: 2px 8px; }
+  .decreeBonus { margin: 7px 0 2px; padding: 4px 10px; font-size: 11.5px; }
+  .decreeBonus .decreeClaimBtn { min-height: 30px; }
+  .siegeBriefGrid { gap: 8px; }
+  .siegeThemeName { font-size: 16px; }
+  .siegeThemeDesc { font-size: 11px; margin-bottom: 2px; }
+  .siegeSection { font-size: 10px; margin: 4px 0 2px; }
+  .siegeRoomRow { gap: 5px; }
+  .siegeRoomCard { width: 72px; padding: 3px 4px 4px; }
+  .siegeRoomArtSlot { height: 26px; }
+  .siegeRoomArtSlot .siegeRoomArt { width: calc(26px * var(--iscale, 1)); height: calc(26px * var(--iscale, 1)); font-size: 17px; }
+  .siegeRoomName { font-size: 9px; min-height: 2.2em; }
+  .siegeRoomLv { font-size: 9.5px; }
+  .siegeModList { gap: 2px; }
+  .siegeModRow { font-size: 11px; }
+  .siegeFeatured { font-size: 10.5px; margin-top: 3px; }
+  /* the Daily Siege column must still fit its start button AND its note above
+     the footer, so the reward tiers give up height before the action block */
+  .siegeBriefRight { gap: 5px; }
+  .siegeTierRow { padding: 2px 8px; font-size: 11px; min-height: 30px; grid-template-columns: 46px 1fr auto; }
+  .siegeTierMini { width: 13px; height: 13px; }
+  .siegeBest, .siegeSeals { font-size: 11px; }
+  .siegePlayBtn { min-height: 38px; font-size: 15px; }
+  .siegeBtnIco { width: 19px; height: 19px; margin-right: 6px; }
+  .siegeActions { gap: 4px; padding-top: 0; }
+  .siegeRetryNote { font-size: 9.5px; }
+  /* the footer keeps a stable minimum height rather than compressing its
+     content: it only trims the ink, never the frame's own safe area (the
+     info-box sprite paints a 14px ornament layout does not reserve) */
+  #kingdomStrip { padding: 9px 16px; gap: 9px; min-height: 62px; }
+  .kingdomArt { width: 34px; height: 34px; }
+  .kingdomBody { gap: 3px; }
+  .kingdomName { font-size: 11px; }
+  .kingdomMeta { font-size: 9.5px; gap: 2px 6px; }
+  #kingdomStrip .msBar { height: 7px; }
+  .kingdomStars { font-size: 12px; }
+  .boardFooter { gap: 8px; padding: 11px 16px; }
+  .boardFooter .bigBtn.small { min-height: 32px; font-size: 12px; padding: 3px 10px; }
+}
+/* shortest supported landscape phones: the Daily Siege column gives up reward
+   -tier padding and footer padding so the start button AND its retry note
+   still land above the shared footer */
+@media (max-height: 430px) {
+  .siegeBriefRight { gap: 4px; }
+  .siegeTierRow { min-height: 26px; padding: 1px 8px; }
+  .siegeRetryNote { min-height: 2.4em; }
+  #kingdomStrip { min-height: 56px; padding: 8px 14px; }
+  .boardFooter { padding: 9px 15px; }
+}
+/* 360px-class windows: the board's shortest supported height. Every section
+   already shed its padding above; here the chrome itself tightens — smaller
+   header, flatter tabs, thinner cards and footer strip — so both tabs still
+   land with no .boardBody scroll and nothing under the footer frame. */
+@media (max-height: 400px) {
+  .boardPanel { padding: 5px 12px; }
+  .boardTitleRow h2 { font-size: 14px; }
+  .boardTabs { margin-top: 2px; }
+  .boardTabs .tabBtn { min-height: 28px; font-size: 11.5px; padding: 2px 10px; }
+  .boardBody { padding-bottom: 5px; }
+  .decreeRow { gap: 5px; }
+  .decreeCard { padding: 4px 7px; gap: 2px; grid-template-rows: auto minmax(24px, 1fr) auto minmax(28px, auto); }
+  .decreeArtSlot { width: 26px; height: 26px; }
+  .decreeText { font-size: 11px; }
+  .decreeCount { font-size: 10px; }
+  .decreeAction { min-height: 28px; }
+  .decreeClaimBtn { min-height: 26px; font-size: 11px; padding: 2px 8px; }
+  .rerollBtn { min-height: 24px; font-size: 10px; padding: 1px 7px; }
+  .decreeBonus { margin: 5px 0 1px; padding: 3px 8px; font-size: 10.5px; }
+  .siegeThemeName { font-size: 14px; }
+  .siegeThemeDesc { font-size: 10px; margin-bottom: 1px; }
+  .siegeSection { font-size: 9.5px; margin: 3px 0 2px; }
+  .siegeRoomCard { width: 64px; padding: 2px 3px 3px; }
+  .siegeRoomArtSlot { height: 22px; }
+  .siegeRoomArtSlot .siegeRoomArt { width: calc(22px * var(--iscale, 1)); height: calc(22px * var(--iscale, 1)); font-size: 15px; }
+  .siegeRoomName { font-size: 8.5px; }
+  .siegeRoomLv { font-size: 9px; }
+  .siegeModRow { font-size: 10px; }
+  .siegeFeatured { font-size: 10px; margin-top: 2px; }
+  .siegeTierRow { min-height: 24px; font-size: 10px; grid-template-columns: 40px 1fr auto; }
+  .siegeTierMini { width: 11px; height: 11px; }
+  .siegeBest, .siegeSeals { font-size: 10px; }
+  .siegePlayBtn { min-height: 34px; font-size: 13px; }
+  .siegeBtnIco { width: 16px; height: 16px; margin-right: 5px; }
+  .siegeRetryNote { font-size: 9px; min-height: 0; }
+  #kingdomStrip { min-height: 44px; padding: 5px 12px; gap: 8px; }
+  .kingdomArt { width: 28px; height: 28px; }
+  #kingdomStrip .msBar { height: 6px; }
+  .kingdomName { font-size: 10px; }
+  .kingdomMeta { font-size: 9px; }
+  .kingdomStars { font-size: 11px; }
+  .boardFooter { padding: 7px 13px; gap: 7px; }
+  .boardFooter .bigBtn.small { min-height: 28px; font-size: 11px; padding: 2px 9px; }
+}
+/* very narrow phones: decree cards stack in a scrollable column */
+@media (max-width: 640px) {
+  .decreeRow { grid-template-columns: 1fr; }
+  .siegeBriefGrid { grid-template-columns: 1fr; }
+  .tabBtn { min-width: 0; flex: 1 1 auto; }
+  /* the summary strip drops its thumbnail column before it squeezes the text */
+  #kingdomStrip { grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
+  .kingdomArt { display: none; }
+}

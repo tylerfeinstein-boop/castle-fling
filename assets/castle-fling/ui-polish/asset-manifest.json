@@ -1,0 +1,575 @@
+{
+  "pack": "castle-fling-ui-polish-sprites-pack",
+  "version": "1.0",
+  "description": "Install-ready sprites for settings icons, how-to-play icons, HUD life bar, enemy death marks, castle damage stages, and dangerous bargain icons.",
+  "install_location": "assets/castle-fling/ui-polish/",
+  "categories": {
+    "settings_icons": [
+      {
+        "id": "settings_icon_sound_effects",
+        "file": "sprites/settings/settings_icon_sound_effects.png",
+        "size": [
+          393,
+          388
+        ],
+        "anchor": "center",
+        "recommended_display_size": [
+          44,
+          44
+        ],
+        "notes": "Replace sound-effects emoji/icon placeholder in Settings."
+      },
+      {
+        "id": "settings_icon_music",
+        "file": "sprites/settings/settings_icon_music.png",
+        "size": [
+          482,
+          381
+        ],
+        "anchor": "center",
+        "recommended_display_size": [
+          44,
+          44
+        ],
+        "notes": "Replace music emoji/icon placeholder in Settings."
+      },
+      {
+        "id": "settings_slider_music_volume",
+        "file": "sprites/settings/settings_slider_music_volume.png",
+        "size": [
+          469,
+          186
+        ],
+        "anchor": "center",
+        "recommended_display_size": [
+          44,
+          44
+        ],
+        "notes": "Use beside or instead of the music volume slider label/icon."
+      },
+      {
+        "id": "settings_icon_screen_shake",
+        "file": "sprites/settings/settings_icon_screen_shake.png",
+        "size": [
+          398,
+          364
+        ],
+        "anchor": "center",
+        "recommended_display_size": [
+          44,
+          44
+        ],
+        "notes": "Replace screen-shake emoji placeholder in Settings."
+      },
+      {
+        "id": "settings_icon_damage_numbers",
+        "file": "sprites/settings/settings_icon_damage_numbers.png",
+        "size": [
+          471,
+          401
+        ],
+        "anchor": "center",
+        "recommended_display_size": [
+          44,
+          44
+        ],
+        "notes": "Replace damage-numbers emoji placeholder in Settings."
+      },
+      {
+        "id": "settings_icon_extra_particles",
+        "file": "sprites/settings/settings_icon_extra_particles.png",
+        "size": [
+          358,
+          380
+        ],
+        "anchor": "center",
+        "recommended_display_size": [
+          44,
+          44
+        ],
+        "notes": "Replace extra-particles emoji placeholder in Settings."
+      }
+    ],
+    "how_to_play_icons": [
+      {
+        "id": "howto_icon_grab_throw",
+        "file": "sprites/how_to_play/howto_icon_grab_throw.png",
+        "size": [
+          354,
+          384
+        ],
+        "anchor": "center",
+        "recommended_display_size": [
+          36,
+          36
+        ],
+        "notes": "Replace hand/grab emoji in How to Play."
+      },
+      {
+        "id": "howto_icon_weight_matters",
+        "file": "sprites/how_to_play/howto_icon_weight_matters.png",
+        "size": [
+          358,
+          355
+        ],
+        "anchor": "center",
+        "recommended_display_size": [
+          36,
+          36
+        ],
+        "notes": "Replace scales/weight emoji in How to Play."
+      },
+      {
+        "id": "howto_icon_defend_castle",
+        "file": "sprites/how_to_play/howto_icon_defend_castle.png",
+        "size": [
+          313,
+          381
+        ],
+        "anchor": "center",
+        "recommended_display_size": [
+          36,
+          36
+        ],
+        "notes": "Replace castle emoji in How to Play."
+      },
+      {
+        "id": "howto_icon_convert",
+        "file": "sprites/how_to_play/howto_icon_convert.png",
+        "size": [
+          316,
+          354
+        ],
+        "anchor": "center",
+        "recommended_display_size": [
+          36,
+          36
+        ],
+        "notes": "Replace convert/sparkle emoji in How to Play."
+      },
+      {
+        "id": "howto_icon_rooms",
+        "file": "sprites/how_to_play/howto_icon_rooms.png",
+        "size": [
+          337,
+          345
+        ],
+        "anchor": "center",
+        "recommended_display_size": [
+          36,
+          36
+        ],
+        "notes": "Replace rooms/building emoji in How to Play."
+      },
+      {
+        "id": "howto_icon_upgrades",
+        "file": "sprites/how_to_play/howto_icon_upgrades.png",
+        "size": [
+          362,
+          371
+        ],
+        "anchor": "center",
+        "recommended_display_size": [
+          36,
+          36
+        ],
+        "notes": "Replace upgrades/card emoji in How to Play."
+      },
+      {
+        "id": "howto_icon_keys",
+        "file": "sprites/how_to_play/howto_icon_keys.png",
+        "size": [
+          362,
+          279
+        ],
+        "anchor": "center",
+        "recommended_display_size": [
+          36,
+          36
+        ],
+        "notes": "Replace keyboard/keys emoji in How to Play."
+      },
+      {
+        "id": "howto_icon_crowns",
+        "file": "sprites/how_to_play/howto_icon_crowns.png",
+        "size": [
+          330,
+          307
+        ],
+        "anchor": "center",
+        "recommended_display_size": [
+          36,
+          36
+        ],
+        "notes": "Replace crown emoji in How to Play."
+      }
+    ],
+    "hud_lifebar": [
+      {
+        "id": "hud_lifebar_frame_empty",
+        "file": "sprites/hud/hud_lifebar_frame_empty.png",
+        "size": [
+          2014,
+          395
+        ],
+        "anchor": "center",
+        "type": "hud_lifebar",
+        "notes": "Primary empty castle life bar frame. Render above clipped fill."
+      },
+      {
+        "id": "hud_lifebar_fill_gradient",
+        "file": "sprites/hud/hud_lifebar_fill_gradient.png",
+        "size": [
+          1402,
+          119
+        ],
+        "anchor": "center",
+        "type": "hud_lifebar",
+        "notes": "Health fill. Clip horizontally based on castle HP ratio, then render under frame."
+      },
+      {
+        "id": "hud_lifebar_left_endcap",
+        "file": "sprites/hud/hud_lifebar_left_endcap.png",
+        "size": [
+          191,
+          220
+        ],
+        "anchor": "center",
+        "type": "hud_lifebar",
+        "notes": "Optional decorative endcap for modular HUD layouts."
+      },
+      {
+        "id": "hud_lifebar_right_endcap",
+        "file": "sprites/hud/hud_lifebar_right_endcap.png",
+        "size": [
+          190,
+          220
+        ],
+        "anchor": "center",
+        "type": "hud_lifebar",
+        "notes": "Optional decorative endcap for modular HUD layouts."
+      }
+    ],
+    "death_marks": [
+      {
+        "id": "death_mark_cracked_dirt",
+        "file": "sprites/death_marks/death_mark_cracked_dirt.png",
+        "size": [
+          554,
+          203
+        ],
+        "anchor": "center",
+        "recommended_display_size": [
+          90,
+          45
+        ],
+        "notes": "Ground/death marker replacement. Use instead of blue/green textured circles."
+      },
+      {
+        "id": "death_mark_scorched_crater",
+        "file": "sprites/death_marks/death_mark_scorched_crater.png",
+        "size": [
+          518,
+          215
+        ],
+        "anchor": "center",
+        "recommended_display_size": [
+          90,
+          45
+        ],
+        "notes": "Ground/death marker replacement. Use instead of blue/green textured circles."
+      },
+      {
+        "id": "death_mark_rocky_crater",
+        "file": "sprites/death_marks/death_mark_rocky_crater.png",
+        "size": [
+          562,
+          209
+        ],
+        "anchor": "center",
+        "recommended_display_size": [
+          90,
+          45
+        ],
+        "notes": "Ground/death marker replacement. Use instead of blue/green textured circles."
+      },
+      {
+        "id": "death_mark_grass_scar",
+        "file": "sprites/death_marks/death_mark_grass_scar.png",
+        "size": [
+          562,
+          264
+        ],
+        "anchor": "center",
+        "recommended_display_size": [
+          90,
+          45
+        ],
+        "notes": "Ground/death marker replacement. Use instead of blue/green textured circles."
+      },
+      {
+        "id": "death_mark_splinter_debris",
+        "file": "sprites/death_marks/death_mark_splinter_debris.png",
+        "size": [
+          538,
+          204
+        ],
+        "anchor": "center",
+        "recommended_display_size": [
+          90,
+          45
+        ],
+        "notes": "Ground/death marker replacement. Use instead of blue/green textured circles."
+      },
+      {
+        "id": "death_mark_smoke_puff",
+        "file": "sprites/death_marks/death_mark_smoke_puff.png",
+        "size": [
+          521,
+          254
+        ],
+        "anchor": "center",
+        "recommended_display_size": [
+          90,
+          45
+        ],
+        "notes": "Ground/death marker replacement. Use instead of blue/green textured circles."
+      },
+      {
+        "id": "death_mark_dust_smudge",
+        "file": "sprites/death_marks/death_mark_dust_smudge.png",
+        "size": [
+          525,
+          187
+        ],
+        "anchor": "center",
+        "recommended_display_size": [
+          90,
+          45
+        ],
+        "notes": "Ground/death marker replacement. Use instead of blue/green textured circles."
+      },
+      {
+        "id": "death_mark_arcane_residue",
+        "file": "sprites/death_marks/death_mark_arcane_residue.png",
+        "size": [
+          506,
+          219
+        ],
+        "anchor": "center",
+        "recommended_display_size": [
+          90,
+          45
+        ],
+        "notes": "Ground/death marker replacement. Use instead of blue/green textured circles."
+      }
+    ],
+    "castle_damage_stages": [
+      {
+        "id": "castle_damage_stage_0_healthy",
+        "file": "sprites/castle_damage/castle_damage_stage_0_healthy.png",
+        "size": [
+          582,
+          613
+        ],
+        "anchor": "bottom-left or bottom-center, matching current castle renderer",
+        "recommended_display_size": [
+          "match existing castle height"
+        ],
+        "notes": "Full castle stage, 100%-76% HP.",
+        "type": "castle_damage_stage"
+      },
+      {
+        "id": "castle_damage_stage_1_light",
+        "file": "sprites/castle_damage/castle_damage_stage_1_light.png",
+        "size": [
+          585,
+          612
+        ],
+        "anchor": "bottom-left or bottom-center, matching current castle renderer",
+        "recommended_display_size": [
+          "match existing castle height"
+        ],
+        "notes": "Full castle stage, 75%-51% HP.",
+        "type": "castle_damage_stage"
+      },
+      {
+        "id": "castle_damage_stage_2_heavy",
+        "file": "sprites/castle_damage/castle_damage_stage_2_heavy.png",
+        "size": [
+          589,
+          591
+        ],
+        "anchor": "bottom-left or bottom-center, matching current castle renderer",
+        "recommended_display_size": [
+          "match existing castle height"
+        ],
+        "notes": "Full castle stage, 50%-26% HP.",
+        "type": "castle_damage_stage"
+      },
+      {
+        "id": "castle_damage_stage_3_critical",
+        "file": "sprites/castle_damage/castle_damage_stage_3_critical.png",
+        "size": [
+          599,
+          596
+        ],
+        "anchor": "bottom-left or bottom-center, matching current castle renderer",
+        "recommended_display_size": [
+          "match existing castle height"
+        ],
+        "notes": "Full castle stage, 25%-0% HP / near defeat.",
+        "type": "castle_damage_stage"
+      }
+    ],
+    "dangerous_bargains": [
+      {
+        "id": "bargain_warning",
+        "file": "sprites/dangerous_bargains/bargain_warning.png",
+        "size": [
+          272,
+          377
+        ],
+        "anchor": "center",
+        "recommended_display_size": [
+          58,
+          58
+        ],
+        "notes": "Generic dangerous bargain warning icon; replace warning emoji in bargain header."
+      },
+      {
+        "id": "bargain_arcane_overload",
+        "file": "sprites/dangerous_bargains/bargain_arcane_overload.png",
+        "size": [
+          281,
+          376
+        ],
+        "anchor": "center",
+        "recommended_display_size": [
+          58,
+          58
+        ],
+        "notes": "Dangerous bargain icon for Arcane Overload / lightning or cooldown tradeoff."
+      },
+      {
+        "id": "bargain_blood_pact",
+        "file": "sprites/dangerous_bargains/bargain_blood_pact.png",
+        "size": [
+          271,
+          379
+        ],
+        "anchor": "center",
+        "recommended_display_size": [
+          58,
+          58
+        ],
+        "notes": "Dangerous bargain icon for blood pact / HP sacrifice tradeoff."
+      },
+      {
+        "id": "bargain_golden_greed",
+        "file": "sprites/dangerous_bargains/bargain_golden_greed.png",
+        "size": [
+          289,
+          363
+        ],
+        "anchor": "center",
+        "recommended_display_size": [
+          58,
+          58
+        ],
+        "notes": "Dangerous bargain icon for gold reward / greed tradeoff."
+      },
+      {
+        "id": "bargain_blade_frenzy",
+        "file": "sprites/dangerous_bargains/bargain_blade_frenzy.png",
+        "size": [
+          274,
+          367
+        ],
+        "anchor": "center",
+        "recommended_display_size": [
+          58,
+          58
+        ],
+        "notes": "Dangerous bargain icon for enemy damage / blade frenzy tradeoff."
+      },
+      {
+        "id": "bargain_shattered_armor",
+        "file": "sprites/dangerous_bargains/bargain_shattered_armor.png",
+        "size": [
+          275,
+          367
+        ],
+        "anchor": "center",
+        "recommended_display_size": [
+          58,
+          58
+        ],
+        "notes": "Dangerous bargain icon for armor/shield cracking tradeoff."
+      },
+      {
+        "id": "bargain_time_warp",
+        "file": "sprites/dangerous_bargains/bargain_time_warp.png",
+        "size": [
+          267,
+          367
+        ],
+        "anchor": "center",
+        "recommended_display_size": [
+          58,
+          58
+        ],
+        "notes": "Dangerous bargain icon for time/cooldown/speed tradeoff."
+      },
+      {
+        "id": "bargain_bomb_madness",
+        "file": "sprites/dangerous_bargains/bargain_bomb_madness.png",
+        "size": [
+          290,
+          364
+        ],
+        "anchor": "center",
+        "recommended_display_size": [
+          58,
+          58
+        ],
+        "notes": "Dangerous bargain icon for bomb carrier/explosive tradeoff."
+      },
+      {
+        "id": "bargain_nightmare_pact",
+        "file": "sprites/dangerous_bargains/bargain_nightmare_pact.png",
+        "size": [
+          289,
+          384
+        ],
+        "anchor": "center",
+        "recommended_display_size": [
+          58,
+          58
+        ],
+        "notes": "Dangerous bargain icon for nightmare/curse/enemy wave tradeoff."
+      },
+      {
+        "id": "bargain_burning_walls",
+        "file": "sprites/dangerous_bargains/bargain_burning_walls.png",
+        "size": [
+          278,
+          392
+        ],
+        "anchor": "center",
+        "recommended_display_size": [
+          58,
+          58
+        ],
+        "notes": "Dangerous bargain icon for burning walls/castle risk tradeoff."
+      }
+    ]
+  },
+  "integration_notes": {
+    "transparency": "All runtime sprites are exported as transparent PNGs with trimmed padding.",
+    "emoji_replacement": "Replace emoji placeholders in Settings, How to Play, and Dangerous Bargain screens with these PNG icons.",
+    "death_marks": "Use death_mark_* sprites instead of the old blue/green textured circles left on the ground after enemy deaths.",
+    "castle_damage": "Use castle_damage_stage_* assets based on castle HP thresholds, replacing old crack overlays or old damage art.",
+    "hud_lifebar": "Use frame + clipped fill for a Castle Fling styled life bar."
+  }
+}

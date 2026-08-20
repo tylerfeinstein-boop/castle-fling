@@ -1,0 +1,15 @@
+{
+  "treasury_ironwall_castle": "sprites/treasury/treasury_ironwall_castle.png",
+  "treasury_spellspire_castle": "sprites/treasury/treasury_spellspire_castle.png",
+  "treasury_barracks_hold": "sprites/treasury/treasury_barracks_hold.png",
+  "treasury_titan_grip": "sprites/treasury/treasury_titan_grip.png",
+  "treasury_storm_fingers": "sprites/treasury/treasury_storm_fingers.png",
+  "treasury_golden_touch": "sprites/treasury/treasury_golden_touch.png",
+  "treasury_ballista_variant": "sprites/treasury/treasury_ballista_variant.png",
+  "treasury_chaos_contract": "sprites/treasury/treasury_chaos_contract.png",
+  "treasury_nightmare_sigil": "sprites/treasury/treasury_nightmare_sigil.png",
+  "treasury_spectral_hand": "sprites/treasury/treasury_spectral_hand.png",
+  "treasury_royal_gauntlet": "sprites/treasury/treasury_royal_gauntlet.png",
+  "treasury_crimson_banners": "sprites/treasury/treasury_crimson_banners.png",
+  "treasury_azure_banners": "sprites/treasury/treasury_azure_banners.png"
+}

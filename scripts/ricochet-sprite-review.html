@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Castle Ricochet — Sprite QA Review (dev only)</title>
+<!-- ============================================================
+     DEV-ONLY before/after QA screen (§ required review, not part of
+     the game's navigation and never packaged into a build: the
+     electron "files" list and android sync entries exclude scripts/).
+     Open from a local dev server, e.g.
+       http://localhost:8000/scripts/ricochet-sprite-review.html
+     Every production sprite renders over a light AND a dark swatch;
+     transparency defects, halos, checkerboards and clipped neighbors
+     are immediately visible. Board-area swatches approximate the
+     bright floor, dark floor, shadowed wall and blue-banner regions.
+     ============================================================ -->
+<style>
+  body { background: #1c1a22; color: #e8dcc0; font: 14px/1.45 Georgia, serif; margin: 20px; }
+  h1 { font-size: 20px; } h2 { font-size: 16px; margin: 26px 0 8px; color: #ffd77a; }
+  .grid { display: flex; flex-wrap: wrap; gap: 10px; }
+  figure { margin: 0; text-align: center; }
+  figcaption { font-size: 10px; color: #9b8f76; max-width: 180px; word-break: break-all; }
+  .sw { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; border: 1px solid #444; }
+  .sw span { display: flex; align-items: center; justify-content: center; padding: 6px; }
+  .sw img { max-width: 150px; max-height: 110px; image-rendering: auto; }
+  .bgLight { background: #d9cfb4; }         /* bright stone floor */
+  .bgDark  { background: #2a2620; }         /* dark stone floor / shadow */
+  .bgBlue  { background: #27406e; }         /* blue banner area */
+  .bgTorch { background: #4a3822; }         /* torch-lit area */
+  .zoomNote { color: #9b8f76; font-size: 12px; }
+</style>
+</head>
+<body>
+<h1>Castle Ricochet — production sprite QA (dev only)</h1>
+<p class="zoomNote">Every runtime sprite over light stone / dark stone / blue banner / torch-lit swatches.
+Use browser zoom for edge inspection. Expected: no checkerboard, no white or gray tile, no rectangular
+edge, no halo, no clipped neighbor sprite.</p>
+<div id="sections"></div>
+<script>
+'use strict';
+var FILES = [
+  'aim/markers/aim_contact_enemy.png', 'aim/markers/aim_contact_pillar.png', 'aim/markers/aim_contact_wall.png',
+  'aim/markers/aim_danger_target.png', 'aim/markers/aim_ricochet_joint.png', 'aim/markers/aim_sink_target.png',
+  'aim/modular/danger/aim_danger_arrow_head.png', 'aim/modular/danger/aim_danger_shaft_tile.png', 'aim/modular/danger/aim_danger_start_cap.png',
+  'aim/modular/enemy_output/aim_enemy_output_arrow_head.png', 'aim/modular/enemy_output/aim_enemy_output_shaft_tile.png', 'aim/modular/enemy_output/aim_enemy_output_start_cap.png',
+  'aim/modular/primary_gold/aim_primary_gold_arrow_head.png', 'aim/modular/primary_gold/aim_primary_gold_shaft_tile.png', 'aim/modular/primary_gold/aim_primary_gold_start_cap.png',
+  'aim/modular/sink_safe/aim_sink_safe_arrow_head.png', 'aim/modular/sink_safe/aim_sink_safe_shaft_tile.png', 'aim/modular/sink_safe/aim_sink_safe_start_cap.png',
+  'aim/modular/striker_deflection/aim_striker_deflection_arrow_head.png', 'aim/modular/striker_deflection/aim_striker_deflection_shaft_tile.png', 'aim/modular/striker_deflection/aim_striker_deflection_start_cap.png',
+  'aim/power/aim_danger_power_glow_1.png', 'aim/power/aim_danger_power_glow_2.png', 'aim/power/aim_danger_power_glow_3.png',
+  'aim/power/aim_primary_gold_power_glow_1.png', 'aim/power/aim_primary_gold_power_glow_2.png', 'aim/power/aim_primary_gold_power_glow_3.png',
+  'aim/power/aim_sink_safe_power_glow_1.png', 'aim/power/aim_sink_safe_power_glow_2.png', 'aim/power/aim_sink_safe_power_glow_3.png',
+  'backgrounds/castle_ricochet_board_01.png',
+  'obstacles/obstacle_bomb_barrel_single.png', 'obstacles/obstacle_bomb_barrels_pair.png', 'obstacles/obstacle_bomb_barrels_stack.png',
+  'obstacles/obstacle_crate_single.png', 'obstacles/obstacle_crates_stack_offset.png', 'obstacles/obstacle_crates_stack_pyramid.png',
+  'obstacles/obstacle_pillar_large.png', 'obstacles/obstacle_pillar_small.png', 'obstacles/obstacle_reinforced_stone_bumper.png',
+  'obstacles/obstacle_spike_barricade_large.png', 'obstacles/obstacle_spike_barricade_small.png',
+  'obstacles/obstacle_stone_block_l_low.png', 'obstacles/obstacle_stone_block_l_small.png', 'obstacles/obstacle_stone_block_l_tall.png',
+  'obstacles/obstacle_stone_block_square.png', 'obstacles/obstacle_stone_wall_corner_left.png', 'obstacles/obstacle_stone_wall_corner_right.png',
+  'obstacles/obstacle_stone_wall_long_banner.png', 'obstacles/obstacle_stone_wall_low_long.png', 'obstacles/obstacle_stone_wall_medium_banner.png',
+  'obstacles/obstacle_stone_wall_short_banner.png', 'obstacles/obstacle_wood_bumper_left.png', 'obstacles/obstacle_wood_bumper_right.png',
+  'obstacles/obstacle_wood_wall_straight.png',
+  'tokens/standardized_384/token_enemy_banner_carrier.png', 'tokens/standardized_384/token_enemy_bomb_carrier.png',
+  'tokens/standardized_384/token_enemy_bomb_cart.png', 'tokens/standardized_384/token_enemy_hammer_brute.png',
+  'tokens/standardized_384/token_enemy_healer.png', 'tokens/standardized_384/token_enemy_heavy_knight.png',
+  'tokens/standardized_384/token_enemy_runner.png', 'tokens/standardized_384/token_enemy_shield_bearer.png',
+  'tokens/standardized_384/token_enemy_siege_captain.png', 'tokens/standardized_384/token_enemy_soldier.png',
+  'tokens/standardized_384/token_enemy_wall_climber.png', 'tokens/standardized_384/token_player_royal_striker.png',
+  'ui/ui_banner_game_over.png', 'ui/ui_banner_victory.png', 'ui/ui_button_home.png', 'ui/ui_button_pause.png',
+  'ui/ui_button_play.png', 'ui/ui_button_restart.png', 'ui/ui_currency_coin_castle.png',
+  'ui/ui_hud_enemies_sunk.png', 'ui/ui_hud_reward.png', 'ui/ui_hud_shots_left.png',
+  'ui/ui_logo_castle_ricochet.png', 'ui/ui_reward_badge_1000.png', 'ui/ui_reward_badge_1500.png',
+  'ui/ui_reward_badge_500.png', 'ui/ui_warning_player_token_game_over.png'
+];
+var groups = {};
+for (var i = 0; i < FILES.length; i++) {
+  var g = FILES[i].split('/')[0];
+  (groups[g] = groups[g] || []).push(FILES[i]);
+}
+var host = document.getElementById('sections');
+Object.keys(groups).forEach(function (g) {
+  var h = document.createElement('h2');
+  h.textContent = g + ' (' + groups[g].length + ')';
+  host.appendChild(h);
+  var grid = document.createElement('div');
+  grid.className = 'grid';
+  groups[g].forEach(function (rel) {
+    var fig = document.createElement('figure');
+    var sw = document.createElement('div');
+    sw.className = 'sw';
+    ['bgLight', 'bgDark', 'bgBlue', 'bgTorch'].forEach(function (cls) {
+      var cell = document.createElement('span');
+      cell.className = cls;
+      var img = document.createElement('img');
+      img.src = '../assets/castle_ricochet/' + rel;
+      img.onerror = function () { cell.textContent = 'LOAD FAILED'; cell.style.color = '#ff5a46'; };
+      cell.appendChild(img);
+      sw.appendChild(cell);
+    });
+    var cap = document.createElement('figcaption');
+    cap.textContent = rel;
+    fig.appendChild(sw);
+    fig.appendChild(cap);
+    grid.appendChild(fig);
+  });
+  host.appendChild(grid);
+});
+</script>
+</body>
+</html>

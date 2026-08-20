@@ -1,0 +1,60 @@
+{
+  "name": "castle-fling",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Castle Fling browser game packaging for Windows and Android.",
+  "main": "electron/main.js",
+  "productName": "Castle Fling",
+  "scripts": {
+    "start": "electron .",
+    "validate:ricochet": "node scripts/validate-ricochet-assets.js",
+    "build:windows": "npm run validate:ricochet && electron-builder --win portable --x64",
+    "sync:android": "npm run validate:ricochet && node scripts/sync-android-assets.js",
+    "build:android": "npm run sync:android && cd android && gradle assembleRelease"
+  },
+  "devDependencies": {
+    "electron": "^31.0.0",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.castlefling.game",
+    "productName": "Castle Fling",
+    "asar": false,
+    "directories": {
+      "output": "dist/windows-portable"
+    },
+    "files": [
+      "index.html",
+      "style.css",
+      "game.js",
+      "platform.js",
+      "ricochet.js",
+      "daily.js",
+      "tutorial.js",
+      "site.webmanifest",
+      "assets/**/*",
+      "!assets/**/*.json",
+      "!assets/**/*.md",
+      "!assets/**/docs/**",
+      "!assets/**/previews/**",
+      "!assets/**/source_sheets/**",
+      "!assets/**/reference_sheets/**",
+      "electron/**/*",
+      "package.json"
+    ],
+    "win": {
+      "icon": "assets/build-branding/icons/app_icon.ico",
+      "target": [
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "portable": {
+      "artifactName": "Castle Fling Portable ${version}.${ext}"
+    }
+  }
+}

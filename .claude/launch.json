@@ -1,0 +1,309 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "castle-fling-relaudit",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "C:/Users/tyler/AppData/Local/Temp/claude/E--GitHub-Castle-Fling/5e31a97b-0b28-49d5-823f-35a0dbb5aba0/scratchpad/serve.js"
+      ],
+      "port": 8950
+    },
+    {
+      "name": "castle-fling-adgate",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "C:/Users/tyler/AppData/Local/Temp/claude/E--GitHub-Castle-Fling/aabf0da1-c729-4259-b2a3-01ccb61f8fb3/scratchpad/serve.js"
+      ],
+      "port": 8944
+    },
+    {
+      "name": "castle-fling-appicon",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "C:/Users/tyler/AppData/Local/Temp/claude/E--GitHub-Castle-Fling/d5f548f1-c5ad-4d34-b612-67f97b4742cb/scratchpad/serve.js"
+      ],
+      "port": 8930
+    },
+    {
+      "name": "castle-fling-aspectfix",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "C:/Users/tyler/AppData/Local/Temp/claude/E--GitHub-Castle-Fling/24f8ea8c-0981-43c9-92a1-bbd273a70ac4/scratchpad/serve.js"
+      ],
+      "port": 8902
+    },
+    {
+      "name": "castle-fling-domfilter",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "C:/Users/tyler/AppData/Local/Temp/claude/E--GitHub-Castle-Fling/5d3c4f6b-d2f6-4e85-8542-b932fd26a84f/scratchpad/serve.js"
+      ],
+      "port": 8897
+    },
+    {
+      "name": "castle-fling-gpufence",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "C:/Users/tyler/AppData/Local/Temp/claude/E--GitHub-Castle-Fling/dcd66917-a4d1-4192-b21e-21bbba2fc3c5/scratchpad/serve.js"
+      ],
+      "port": 8863
+    },
+    {
+      "name": "castle-fling-mscoins",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "C:/Users/tyler/AppData/Local/Temp/claude/E--GitHub-Castle-Fling/7d5522aa-f79d-4539-bbb8-0e723744d57f/scratchpad/serve.js"
+      ],
+      "port": 8849
+    },
+    {
+      "name": "castle-fling",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "C:/Users/tyler/AppData/Local/Temp/claude/E--GitHub-Castle-Fling/678d7caf-03a2-4781-ac21-6c532d0a913e/scratchpad/serve.js"
+      ],
+      "port": 8734
+    },
+    {
+      "name": "castle-fling-aimfix",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "C:/Users/tyler/AppData/Local/Temp/claude/E--GitHub-Castle-Fling/c104de22-b125-46e9-bda0-817e656f7c2f/scratchpad/serve.js"
+      ],
+      "port": 8741
+    },
+    {
+      "name": "castle-fling-ricofix",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "C:/Users/tyler/AppData/Local/Temp/claude/E--GitHub-Castle-Fling/b6697825-a612-4ffa-920b-4796b6748f8d/scratchpad/serve.js"
+      ],
+      "port": 8748
+    },
+    {
+      "name": "castle-fling-collfix",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "C:/Users/tyler/AppData/Local/Temp/claude/E--GitHub-Castle-Fling/f6102ec3-2bf1-4921-947a-404fe66ab1bd/scratchpad/serve.js"
+      ],
+      "port": 8752
+    },
+    {
+      "name": "castle-fling-spritefix",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "C:/Users/tyler/AppData/Local/Temp/claude/E--GitHub-Castle-Fling/11d86606-218b-435f-ae9d-81bcaa803590/scratchpad/serve.js"
+      ],
+      "port": 8756
+    },
+    {
+      "name": "castle-fling-iconpass",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "C:/Users/tyler/AppData/Local/Temp/claude/E--GitHub-Castle-Fling/90d45856-8865-48ba-a993-1df6f304b793/scratchpad/serve.js"
+      ],
+      "port": 8765
+    },
+    {
+      "name": "castle-fling-uitheme",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "C:/Users/tyler/AppData/Local/Temp/claude/E--GitHub-Castle-Fling/ab762097-c2a4-48db-906c-8f31c6648d6a/scratchpad/serve.js"
+      ],
+      "port": 8770
+    },
+    {
+      "name": "castle-fling-daily",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "C:/Users/tyler/AppData/Local/Temp/claude/E--GitHub-Castle-Fling/a168f18e-8808-447a-995d-a6849f50b689/scratchpad/serve.js"
+      ],
+      "port": 8775
+    },
+    {
+      "name": "castle-fling-kingdom",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "C:/Users/tyler/AppData/Local/Temp/claude/E--GitHub-Castle-Fling/e0046edb-4cb8-4519-8eb0-d1e59ec383da/scratchpad/serve.js"
+      ],
+      "port": 8779
+    },
+    {
+      "name": "castle-fling-krmap",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "C:/Users/tyler/AppData/Local/Temp/claude/E--GitHub-Castle-Fling/5fcb88a8-d687-43a4-b51d-774fffae36aa/scratchpad/serve.js"
+      ],
+      "port": 8785
+    },
+    {
+      "name": "castle-fling-uipolish",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "C:/Users/tyler/AppData/Local/Temp/claude/E--GitHub-Castle-Fling/007bc6a9-4f86-41c6-bcac-3e5c4b397d00/scratchpad/serve.js"
+      ],
+      "port": 8790
+    },
+    {
+      "name": "castle-fling-krcard",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "C:/Users/tyler/AppData/Local/Temp/claude/E--GitHub-Castle-Fling/d42abaf4-9404-4ffd-86fa-d6e8396e19f9/scratchpad/serve.js"
+      ],
+      "port": 8801
+    },
+    {
+      "name": "castle-fling-barfix",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "C:/Users/tyler/AppData/Local/Temp/claude/E--GitHub-Castle-Fling/f7825a94-d498-407e-9da2-8aa727c3aa96/scratchpad/serve.js"
+      ],
+      "port": 8806
+    },
+    {
+      "name": "castle-fling-tutorial",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "C:/Users/tyler/AppData/Local/Temp/claude/E--GitHub-Castle-Fling/71a87042-488a-4ca1-a929-ff1f483b50ec/scratchpad/serve.js"
+      ],
+      "port": 8812
+    },
+    {
+      "name": "castle-fling-iconswap",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "C:/Users/tyler/AppData/Local/Temp/claude/E--GitHub-Castle-Fling/20b29b31-8297-4374-8285-45f79380df04/scratchpad/serve.js"
+      ],
+      "port": 8818
+    },
+    {
+      "name": "castle-fling-uifix",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "C:/Users/tyler/AppData/Local/Temp/claude/E--GitHub-Castle-Fling/76df57e2-5905-45ed-8357-e20c79a236d5/scratchpad/serve.js"
+      ],
+      "port": 8824
+    },
+    {
+      "name": "castle-fling-tutrepair",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "C:/Users/tyler/AppData/Local/Temp/claude/E--GitHub-Castle-Fling/73ae0a1a-1e94-45eb-a629-c468d0c89e56/scratchpad/serve.js"
+      ],
+      "port": 8830
+    },
+    {
+      "name": "castle-fling-krcrowns",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "C:/Users/tyler/AppData/Local/Temp/claude/E--GitHub-Castle-Fling/e69b4e39-10c7-4f5c-a296-aa5137ac2645/scratchpad/serve.js"
+      ],
+      "port": 8836
+    },
+    {
+      "name": "castle-fling-arrowfix",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "C:/Users/tyler/AppData/Local/Temp/claude/E--GitHub-Castle-Fling/bc8659ee-b925-4e32-af7c-3d44334c9288/scratchpad/serve.js"
+      ],
+      "port": 8761
+    },
+    {
+      "name": "castle-fling-tutfix",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "C:/Users/tyler/AppData/Local/Temp/claude/E--GitHub-Castle-Fling/6649f613-28b7-4371-b7e0-484ff95a6579/scratchpad/serve.js"
+      ],
+      "port": 8842
+    },
+    {
+      "name": "castle-fling-apkpass",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "C:/Users/tyler/AppData/Local/Temp/claude/E--GitHub-Castle-Fling/fa3dae98-9f12-4f10-b54c-1ac45473b906/scratchpad/serve.js"
+      ],
+      "port": 8857
+    },
+    {
+      "name": "castle-fling-vc5howto",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "C:/Users/tyler/AppData/Local/Temp/claude/E--GitHub-Castle-Fling/3f03bf63-7a9a-4cda-9a2a-571b6b157bbd/scratchpad/serve.js"
+      ],
+      "port": 8851
+    },
+    {
+      "name": "castle-fling-fitpass",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "C:/Users/tyler/AppData/Local/Temp/claude/E--GitHub-Castle-Fling/edc965df-c8be-4d93-a7a2-ed7485413015/scratchpad/serve.js"
+      ],
+      "port": 8873
+    },
+    {
+      "name": "castle-fling-boardtut",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "C:/Users/tyler/AppData/Local/Temp/claude/E--GitHub-Castle-Fling/8f33dd2a-8f83-41e1-852a-6d4fda9db65b/scratchpad/serve.js"
+      ],
+      "port": 8878
+    },
+    {
+      "name": "castle-fling-hudseal",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "C:/Users/tyler/AppData/Local/Temp/claude/E--GitHub-Castle-Fling/4f5808ba-c10e-4241-9d10-0b853bd9a69c/scratchpad/serve.js"
+      ],
+      "port": 8884
+    },
+    {
+      "name": "castle-fling-spriteclean",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "C:/Users/tyler/AppData/Local/Temp/claude/E--GitHub-Castle-Fling/b0b8e223-4f46-460b-81d1-55cabd769c25/scratchpad/serve.js"
+      ],
+      "port": 8869
+    },
+    {
+      "name": "castle-fling-hudfit",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "C:/Users/tyler/AppData/Local/Temp/claude/E--GitHub-Castle-Fling/dbadca61-46d8-4c93-afa2-090c411317c5/scratchpad/serve.js"
+      ],
+      "port": 8891
+    },
+    {
+      "name": "castle-fling-holerims",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "C:/Users/tyler/AppData/Local/Temp/claude/E--GitHub-Castle-Fling/27f29dc0-7528-4b04-b1bc-1bb99861e7ae/scratchpad/serve.js"
+      ],
+      "port": 8908
+    },
+    {
+      "name": "castle-fling-siegepace",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "C:/Users/tyler/AppData/Local/Temp/claude/E--GitHub-Castle-Fling/aac30124-8775-4f00-ad6e-1a1f8ac20d7b/scratchpad/serve.js"
+      ],
+      "port": 8921
+    },
+    {
+      "name": "castle-fling-adsbilling",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "C:/Users/tyler/AppData/Local/Temp/claude/E--GitHub-Castle-Fling/6c80bc27-294d-43c8-a4fc-7d1af8c55d11/scratchpad/serve.js"
+      ],
+      "port": 8936
+    },
+    {
+      "name": "castle-fling-krpassives",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "C:/Users/tyler/AppData/Local/Temp/claude/E--GitHub-Castle-Fling/6f57dc11-a99b-4bc3-be85-cbde7a6c5209/scratchpad/serve.js"
+      ],
+      "port": 8915
+    }
+  ]
+}
