@@ -12,6 +12,10 @@ Ships as a browser build, a Windows portable EXE and an Android app.
 **Released.** Live on Google Play in general availability — through closed
 testing, open testing and full production review.
 
+The Git history starts late. The game was built, packaged and shipped before it
+was put under version control, so the log covers maintenance rather than the
+build. What is here is the finished product, not the road to it.
+
 ## Technology
 
 - Vanilla JavaScript game running on a fixed 16:9 logical battlefield (1280x720)
