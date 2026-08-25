@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Foreground inset 18.5% puts the 108dp artwork at 68dp, so the outermost
+     subjects (the enemy's fingertips, at 0.97 of the art's half-width) land
+     inside Android's guaranteed-unclipped 66dp safe circle. No mask can take a
+     hand, a horn, a banner or the crown; only sky and scenery reach the corners.
+     The background is NOT inset — it fills all 108dp with a blurred cover of the
+     same scene, so the sliver a squircle mask exposes outside the foreground
+     continues the artwork instead of showing an empty border or a new frame.
+     Regenerate the layers with: node scripts/build-app-icon.js -->
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@mipmap/ic_launcher_background" />
+    <foreground>
+        <inset android:drawable="@mipmap/ic_launcher_foreground" android:inset="18.5%" />
+    </foreground>
+</adaptive-icon>

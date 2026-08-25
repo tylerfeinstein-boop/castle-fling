@@ -1,0 +1,158 @@
+apply plugin: 'com.android.application'
+
+// release signing credentials live outside the project (see the folder noted
+// in keystore.properties); builds fall back to unsigned release if absent
+def keystoreProps = new Properties()
+def keystorePropsFile = rootProject.file('keystore.properties')
+if (keystorePropsFile.exists()) {
+    keystorePropsFile.withInputStream { keystoreProps.load(it) }
+}
+
+/* ============================================================
+   ADMOB IDENTIFIERS — SINGLE SOURCE OF TRUTH
+   ------------------------------------------------------------
+   Ad units are created natively (that is where the SDK objects live), so the
+   IDs are chosen here and handed to Java as BuildConfig fields and to the
+   manifest as a placeholder. Nothing in the JS layer hardcodes an ad unit.
+
+   The buildType picks the set, so a debug build CANNOT serve a production ad
+   and a release build CANNOT serve a Google sample ad — there is no runtime
+   flag to get wrong.
+
+   PROD_* are the real Castle Fling units registered in AdMob.
+   TEST_* are Google's published sample units, which always fill and never
+   generate real impressions or revenue.
+   ============================================================ */
+def PROD_ADMOB_APP_ID      = "ca-app-pub-5296169213947419~8174715470"
+def PROD_REWARDED_ID       = "ca-app-pub-5296169213947419/6751501320"
+def PROD_INTERSTITIAL_ID   = "ca-app-pub-5296169213947419/5097125993"
+
+def TEST_ADMOB_APP_ID      = "ca-app-pub-3940256099942544~3347511713"
+def TEST_REWARDED_ID       = "ca-app-pub-3940256099942544/5224354917"
+def TEST_INTERSTITIAL_ID   = "ca-app-pub-3940256099942544/1033173712"
+
+android {
+    namespace = "com.emptyhelmetgames.castlefling"
+    compileSdk = rootProject.ext.compileSdkVersion
+    buildFeatures {
+        // AGP 8 no longer generates BuildConfig unless asked; the ad unit IDs
+        // above are delivered to Java through it.
+        buildConfig true
+    }
+    defaultConfig {
+        applicationId "com.emptyhelmetgames.castlefling"
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        /* MUST increment on EVERY upload, including a rebuild of the "same"
+           release — Play rejects a duplicate versionCode outright. Bump before
+           any re-upload, not just before a new feature release.
+             11 — first billing-enabled build (uploaded)
+             12 — Capacitor bridge fix (ads never initialised)
+             13 — between-wave interstitials restored, rewarded button reset
+             14 — purchase-option offers (shop was empty), catalog refresh
+             15 — billing diagnostics: no silent returns, store state in report
+             16 — report now names the ids sent + the ids Play refused
+             17 — required-interstitial gate: a due ad is a persisted debt, so
+                  killing the network no longer skips it (offline fails closed,
+                  provider no-fill fails open); native connectivity check
+             18 — production gate repaired: window.BUILD_CONFIG was never
+                  assigned, so every `!(window.BUILD_CONFIG && ...)` dev gate
+                  read undefined and shipped its test hooks + debug code in
+                  release; temp dev seal-grant removed from index.html */
+        versionCode 18
+        versionName "1.0.0"    // production 1.0.0; vc9/1.0.1 was closed testing
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        aaptOptions {
+             // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
+             // Default: https://android.googlesource.com/platform/frameworks/base/+/282e181b58cf72b6ca770dc7ca5f91f135444502/tools/aapt/AaptAssets.cpp#61
+            ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
+        }
+    }
+    signingConfigs {
+        release {
+            if (keystoreProps['storeFile']) {
+                storeFile file(keystoreProps['storeFile'])
+                storePassword keystoreProps['storePassword']
+                keyAlias keystoreProps['keyAlias']
+                keyPassword keystoreProps['keyPassword']
+            }
+        }
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            if (keystoreProps['storeFile']) {
+                signingConfig signingConfigs.release
+            }
+            // PRODUCTION ads: real Castle Fling units, real impressions.
+            manifestPlaceholders = [admobAppId: PROD_ADMOB_APP_ID]
+            buildConfigField "String", "ADMOB_REWARDED_ID",     "\"${PROD_REWARDED_ID}\""
+            buildConfigField "String", "ADMOB_INTERSTITIAL_ID", "\"${PROD_INTERSTITIAL_ID}\""
+            buildConfigField "boolean", "ADS_TEST_MODE", "false"
+        }
+        debug {
+            // side-by-side installs: debug builds must never collide with the
+            // Play-installed closed-test app on the same device
+            applicationIdSuffix ".dev"
+            versionNameSuffix "-dev"
+            // TEST ads only. Developer testing must never bill an advertiser or
+            // put invalid-traffic risk on the AdMob account.
+            manifestPlaceholders = [admobAppId: TEST_ADMOB_APP_ID]
+            buildConfigField "String", "ADMOB_REWARDED_ID",     "\"${TEST_REWARDED_ID}\""
+            buildConfigField "String", "ADMOB_INTERSTITIAL_ID", "\"${TEST_INTERSTITIAL_ID}\""
+            buildConfigField "boolean", "ADS_TEST_MODE", "true"
+        }
+    }
+}
+
+repositories {
+    flatDir{
+        dirs '../capacitor-cordova-android-plugins/src/main/libs', 'libs'
+    }
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    // Capacitor declares these as `implementation`, so they are NOT on this
+    // module's compile classpath. MainActivity needs them directly for
+    // EdgeToEdge / OnBackPressedCallback (activity) and
+    // WindowInsetsCompat / ViewCompat / WindowInsetsControllerCompat (core).
+    implementation "androidx.activity:activity:$androidxActivityVersion"
+    implementation "androidx.core:core:$androidxCoreVersion"
+    implementation "androidx.appcompat:appcompat:$androidxAppCompatVersion"
+    implementation "androidx.coordinatorlayout:coordinatorlayout:$androidxCoordinatorLayoutVersion"
+    implementation "androidx.core:core-splashscreen:$coreSplashScreenVersion"
+    implementation project(':capacitor-android')
+
+    /* Monetization. Versions are pinned in variables.gradle.
+       - play-services-ads      : rewarded + interstitial, and it is what
+                                  contributes the AD_ID permission and the
+                                  AdMob initialization provider to the manifest.
+       - user-messaging-platform: UMP/GDPR consent. Pulled in transitively by
+                                  the ads SDK too; declared so the consent API
+                                  we compile against is explicit.
+       - billing                : Google Play Billing. This dependency is what
+                                  puts com.android.vending.BILLING into the
+                                  MERGED manifest — the permission is never
+                                  hand-written into our source manifest. */
+    implementation "com.google.android.gms:play-services-ads:$playServicesAdsVersion"
+    implementation "com.google.android.ump:user-messaging-platform:$userMessagingPlatformVersion"
+    implementation "com.android.billingclient:billing:$billingClientVersion"
+
+    testImplementation "junit:junit:$junitVersion"
+    androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
+    implementation project(':capacitor-cordova-android-plugins')
+}
+
+apply from: 'capacitor.build.gradle'
+
+try {
+    def servicesJSON = file('google-services.json')
+    if (servicesJSON.text) {
+        apply plugin: 'com.google.gms.google-services'
+    }
+} catch(Exception e) {
+    logger.info("google-services.json not found, google-services plugin not applied. Push Notifications won't work")
+}

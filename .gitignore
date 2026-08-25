@@ -40,3 +40,13 @@ desktop.ini
 
 # .claude/skills is a junction mirror of .agents/skills (single source of truth)
 .claude/skills/
+
+# --- The shipped Android app ---
+# build/mobile holds the Capacitor project that ships to Google Play
+# (com.emptyhelmetgames.castlefling). build/.gitignore decides what inside it is
+# generated; these rules just re-open the path that "build/*" closed above.
+!build/mobile/
+build/mobile/*
+!build/mobile/capacitor.config.json
+!build/mobile/package.json
+!build/mobile/android/

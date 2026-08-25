@@ -1,0 +1,15 @@
+{
+  "name": "castle-fling-mobile",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Castle Fling Android build",
+  "dependencies": {
+    "@capacitor/android": "^8.4.1",
+    "@capacitor/cli": "^8.4.1",
+    "@capacitor/core": "^8.4.1",
+    "@capacitor/preferences": "^8.0.1"
+  },
+  "devDependencies": {
+    "@capacitor/assets": "^3.0.5"
+  }
+}

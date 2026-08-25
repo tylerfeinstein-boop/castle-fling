@@ -1,0 +1,35 @@
+ext {
+    minSdkVersion = 24
+    compileSdkVersion = 36
+    targetSdkVersion = 36
+    androidxActivityVersion = '1.11.0'
+    androidxAppCompatVersion = '1.7.1'
+    androidxCoordinatorLayoutVersion = '1.3.0'
+    androidxCoreVersion = '1.17.0'
+    androidxFragmentVersion = '1.8.9'
+    coreSplashScreenVersion = '1.2.0'
+    androidxWebkitVersion = '1.14.0'
+    junitVersion = '4.13.2'
+    androidxJunitVersion = '1.3.0'
+    androidxEspressoCoreVersion = '3.7.0'
+    cordovaAndroidVersion = '14.0.1'
+
+    /* Monetization SDKs (added 2026-08 for the billing-enabled production
+       candidate). play-services-ads already pulls user-messaging-platform in
+       transitively; UMP is ALSO declared explicitly in app/build.gradle so the
+       consent API we compile against can never silently disappear behind a
+       transitive version bump. Gradle resolves to the higher of the two.
+
+       These three lines are the only place SDK versions are chosen. */
+    playServicesAdsVersion = '25.4.0'
+    /* Must stay >= whatever play-services-ads pulls in transitively, or Gradle
+       silently resolves past this number and the declaration becomes a lie.
+       ads 25.4.0 brings UMP 4.0.0. */
+    userMessagingPlatformVersion = '4.0.0'
+    /* Play raises the minimum Billing Library version every year, and an
+       upload below the floor is rejected outright — so this tracks current
+       rather than "oldest that still compiles". 9.x returns product details as
+       QueryProductDetailsResult instead of List<ProductDetails>;
+       CastleFlingBillingPlugin is written against that shape. */
+    billingClientVersion = '9.1.0'
+}

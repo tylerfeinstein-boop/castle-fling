@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Fallback only: the adaptive icon draws @mipmap/ic_launcher_background. This
+     is the average of the artwork's sky band, so anything that falls back to the
+     colour lands on the icon's own blue instead of the old flat white. -->
+<resources>
+    <color name="ic_launcher_background">#4974AF</color>
+</resources>

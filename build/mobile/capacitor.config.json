@@ -1,0 +1,12 @@
+{
+  "appId": "com.emptyhelmetgames.castlefling",
+  "appName": "Castle Fling",
+  "webDir": "www",
+  "android": {
+    "backgroundColor": "#12100e",
+    "allowMixedContent": false
+  },
+  "server": {
+    "androidScheme": "https"
+  }
+}

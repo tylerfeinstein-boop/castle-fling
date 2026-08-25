@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Permissions -->
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Network state: read by CastleFlingAdsPlugin to tell "this device has no
+         usable internet" apart from "the ad network had nothing to serve". The
+         required-interstitial gate fails CLOSED only on the former, so without
+         this permission a genuine no-fill would be misread as offline and the
+         player could be blocked for a provider outage. Normal permission — no
+         runtime request, no Play Data Safety declaration (no data leaves the
+         device; the flag is only ever compared locally). -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <!-- Advertising ID access: matches the Play "Advertising ID" declaration.
+         The Google Mobile Ads SDK now merges this in itself; the explicit
+         declaration is kept because the merger dedupes identical uses-permission
+         entries (no duplicate in the merged manifest) and it keeps the Play Data
+         Safety declaration true even if a future SDK version stops contributing
+         it. Do not remove without re-checking the merged manifest.
+
+         The Play Billing permission is deliberately NOT declared in this file —
+         it is contributed by the Play Billing Library itself, so the permission
+         can never appear without the library that implements it. (Its literal
+         name is intentionally not written here: this comment survives into the
+         merged manifest, and spelling it out would make a verification grep for
+         that permission match a comment instead of a real declaration.) -->
+    <uses-permission android:name="com.google.android.gms.permission.AD_ID" />
+
+    <!-- Large-screen reach: the game is fully playable with a mouse (the desktop
+         build uses the same input path), so touch must not be an install filter
+         for ChromeOS and desktop-Android windows. -->
+    <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
+    <uses-feature android:name="android.hardware.faketouch" android:required="false" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:resizeableActivity="true"
+        android:theme="@style/AppTheme">
+
+        <!-- AdMob application ID. The value is supplied by the buildType
+             (see admobAppId in app/build.gradle), so a debug build carries
+             Google's test app ID and only a release build carries the real
+             Castle Fling registration. Note the '~' separator: this is the APP
+             ID, not an ad unit ID (those use '/'). The SDK throws at startup if
+             this metadata is missing. -->
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="${admobAppId}" />
+
+        <!-- No android:screenOrientation: Play flags a hard orientation lock as a
+             large-screen compatibility problem, and on large screens the system
+             ignores it anyway. Gameplay is still landscape-first — a portrait or
+             very narrow window shows the themed "turn your device" overlay and
+             pauses the run instead of rendering a crushed layout (see
+             updateOrientationGate in game.js).
+             configChanges keeps this Activity ALIVE across rotation, resize,
+             fold/unfold and split-screen: the run, the tutorial and the Ricochet
+             attempt all live in WebView memory, so a recreate would reload the
+             game. onConfigurationChanged re-pushes insets and re-measures. -->
+        <activity
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode|navigation|density"
+            android:name=".MainActivity"
+            android:label="@string/title_activity_main"
+            android:theme="@style/AppTheme.NoActionBarLaunch"
+            android:launchMode="singleTask"
+            android:resizeableActivity="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/file_paths" />
+        </provider>
+    </application>
+</manifest>
