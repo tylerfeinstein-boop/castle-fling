@@ -3,11 +3,12 @@
 A physics-flinging castle defence game. You grab enemy soldiers with a giant hand,
 fling them, and convert them into defenders while upgrading a kingdom between runs.
 Ships as a browser build, a Windows portable EXE and an Android app
-(`com.castlefling.game`, currently in Play Store closed testing).
+(`com.castlefling.game`), **released to production on Google Play**.
 
 ## Status
 
-Active — in closed testing on Google Play.
+**Released.** Live on Google Play in general availability — through closed
+testing, open testing and full production review.
 
 ## Technology
 
