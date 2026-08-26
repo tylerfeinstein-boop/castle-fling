@@ -7,6 +7,19 @@ Ships as a browser build, a Windows portable EXE and an Android app.
 **▶ [Play it on Google Play](https://play.google.com/store/apps/details?id=com.emptyhelmetgames.castlefling)**
 · `com.emptyhelmetgames.castlefling` · Empty Helmet Games
 
+![Battle — wave in progress](docs/screenshots/battle.jpg)
+
+<table>
+<tr>
+<td width="50%"><img alt="Main menu" src="docs/screenshots/menu.jpg"></td>
+<td width="50%"><img alt="Castle select" src="docs/screenshots/castle-select.jpg"></td>
+</tr>
+<tr>
+<td>Main menu — crown shop, upgrades, daily run and the Castle Ricochet mode.</td>
+<td>Castle select — four starts with different stats, unlocked from the treasury between runs.</td>
+</tr>
+</table>
+
 ## Status
 
 **Released.** Live on Google Play in general availability — through closed
